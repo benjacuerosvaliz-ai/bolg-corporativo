@@ -17,7 +17,7 @@ Conectada al Shopify principal de BOLG (Storefront + Admin API). Permite a empre
 ```bash
 npm install
 cp .env.example .env.local   # rellena lo que tengas, deja USE_MOCK_PRODUCTS=true
-npm run dev                   # http://localhost:3000
+npm run dev                   # http://localhost:3500
 ```
 
 ## Estructura

@@ -5,11 +5,11 @@
       "name": "dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 3000,
+      "port": 3500,
       "cwd": "/Users/benja/bolg-corporativo",
       "env": {
         "USE_MOCK_PRODUCTS": "true",
-        "NEXT_PUBLIC_SITE_URL": "http://localhost:3000"
+        "NEXT_PUBLIC_SITE_URL": "http://localhost:3500"
       }
     }
   ]

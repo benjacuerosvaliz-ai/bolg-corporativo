@@ -1,41 +1,85 @@
 import { SHOPIFY_ENV, USE_MOCK_PRODUCTS, assertStorefrontEnv } from "./env";
 import type { CorporateProduct } from "./types";
 import { mockCorporateProducts, mockProductByHandle } from "./mock";
+import {
+  LIST_CORPORATE_PRODUCTS,
+  GET_CORPORATE_PRODUCT_BY_HANDLE,
+} from "./queries";
+import {
+  mapShopifyProductToCorporate,
+  type RawShopifyProduct,
+} from "./mappers";
 
 /**
- * Cliente del Storefront API de Shopify. Read-only, público.
+ * Cliente del Storefront API de Shopify. Read-only.
  *
- * En Fase 0 funciona en modo mock (USE_MOCK_PRODUCTS=true). El cliente real
- * se conecta en Fase 1/2 cuando los metafields corporate.* estén configurados
- * en el Shopify de BOLG.
- *
- * TODO Fase 1: implementar query GraphQL real contra Storefront API.
+ * Con USE_MOCK_PRODUCTS=true → devuelve mockCorporateProducts.
+ * Con USE_MOCK_PRODUCTS=false → consulta Shopify y mapea los metafields
+ * corporate.*. Si algún producto taggeado CORPORATIVO no tiene los
+ * metafields, lanza un error explicativo (no rellena con defaults
+ * silenciosos para no engañar al equipo comercial).
  */
 
-export async function listCorporateProducts(): Promise<CorporateProduct[]> {
-  if (USE_MOCK_PRODUCTS) {
-    return mockCorporateProducts;
-  }
+const STOREFRONT_ENDPOINT = () =>
+  `https://${SHOPIFY_ENV.storeDomain}/api/${SHOPIFY_ENV.apiVersion}/graphql.json`;
+
+async function storefrontFetch<T>(
+  query: string,
+  variables?: Record<string, unknown>,
+): Promise<T> {
   assertStorefrontEnv();
-  // TODO Fase 1: GraphQL query con filtro por tag CORPORATIVO + metafields.
-  throw new Error(
-    "Storefront client real todavía no implementado. Usa USE_MOCK_PRODUCTS=true para Fase 0-1.",
-  );
+  const res = await fetch(STOREFRONT_ENDPOINT(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Storefront-Access-Token": SHOPIFY_ENV.storefrontToken,
+    },
+    body: JSON.stringify({ query, variables }),
+    next: { revalidate: 60 },
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Shopify Storefront API ${res.status}: ${await res.text().catch(() => "<no body>")}`,
+    );
+  }
+
+  const json = (await res.json()) as {
+    data?: T;
+    errors?: { message: string }[];
+  };
+
+  if (json.errors?.length) {
+    throw new Error(
+      `Shopify Storefront GraphQL errors: ${json.errors.map((e) => e.message).join("; ")}`,
+    );
+  }
+  if (!json.data) {
+    throw new Error("Shopify Storefront response sin data.");
+  }
+  return json.data;
+}
+
+export async function listCorporateProducts(): Promise<CorporateProduct[]> {
+  if (USE_MOCK_PRODUCTS) return mockCorporateProducts;
+
+  const data = await storefrontFetch<{
+    products: { edges: { node: RawShopifyProduct }[] };
+  }>(LIST_CORPORATE_PRODUCTS, { first: 50 });
+
+  return data.products.edges.map((e) => mapShopifyProductToCorporate(e.node));
 }
 
 export async function getCorporateProductByHandle(
   handle: string,
 ): Promise<CorporateProduct | null> {
-  if (USE_MOCK_PRODUCTS) {
-    return mockProductByHandle(handle);
-  }
-  assertStorefrontEnv();
-  // TODO Fase 1: GraphQL query productByHandle con todos los metafields.
-  throw new Error(
-    "Storefront client real todavía no implementado. Usa USE_MOCK_PRODUCTS=true para Fase 0-1.",
-  );
-}
+  if (USE_MOCK_PRODUCTS) return mockProductByHandle(handle);
 
-export function storefrontEndpoint(): string {
-  return `https://${SHOPIFY_ENV.storeDomain}/api/${SHOPIFY_ENV.apiVersion}/graphql.json`;
+  const data = await storefrontFetch<{ product: RawShopifyProduct | null }>(
+    GET_CORPORATE_PRODUCT_BY_HANDLE,
+    { handle },
+  );
+
+  if (!data.product) return null;
+  return mapShopifyProductToCorporate(data.product);
 }

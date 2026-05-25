@@ -10,7 +10,7 @@ import {
 export const metadata: Metadata = {
   title: "Catálogo corporativo",
   description:
-    "Catálogo BOLG para empresas: mochilas, botellas, vestuario y accesorios. Cotiza con tu logo, precios por volumen y stock real.",
+    "Catálogo BØLG para empresas: mochilas, botellas, vestuario y accesorios. Cotiza con tu logo, precios por volumen y stock real.",
 };
 
 export default async function CatalogoPage({

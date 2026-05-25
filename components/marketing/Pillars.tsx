@@ -7,7 +7,7 @@ const PILLARS = [
   {
     n: "02",
     title: "Stock real + re-order programado",
-    body: "Consultamos el inventario directo desde Shopify. Si necesitas más unidades que el stock listo, calculamos la reposición desde origen y validamos que llegue a tu fecha.",
+    body: "Consultamos el inventario en tiempo real. Si necesitas más unidades que el stock listo, calculamos la reposición desde origen y validamos que llegue a tu fecha.",
   },
   {
     n: "03",

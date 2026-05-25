@@ -19,7 +19,7 @@ export function LogoWall() {
     <section className="border-b border-bolg-border bg-bolg-bg">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
         <p className="text-center text-xs uppercase tracking-[0.25em] text-bolg-text/50">
-          Empresas que confían en BOLG
+          Empresas que confían en BØLG
         </p>
 
         <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-bolg-card border border-bolg-border bg-bolg-border sm:grid-cols-3 lg:grid-cols-6">

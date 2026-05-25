@@ -24,11 +24,11 @@ const bodyFont = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "BOLG Corporativo — Cotización de productos personalizados",
-    template: "%s · BOLG Corporativo",
+    default: "BØLG Corporativo — Cotización de productos personalizados",
+    template: "%s · BØLG Corporativo",
   },
   description:
-    "Plataforma B2B de BOLG. Cotiza mochilas, botellas y productos lifestyle personalizados con tu logo. Stock real, precios por volumen y timeline garantizado.",
+    "Plataforma B2B de BØLG. Cotiza mochilas, botellas y productos lifestyle personalizados con tu logo. Stock real, precios por volumen y timeline garantizado.",
   metadataBase: new URL(
     process.env["NEXT_PUBLIC_SITE_URL"] ?? "https://corporativo.bolg.cl",
   ),

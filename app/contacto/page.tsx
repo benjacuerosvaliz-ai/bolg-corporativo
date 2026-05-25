@@ -19,7 +19,7 @@ export default function ContactoPage() {
         Contacto
       </p>
       <h1 className="mt-4 text-3xl font-light leading-[1.1] sm:text-4xl lg:text-5xl">
-        Habla directo con el equipo corporativo de BOLG.
+        Habla directo con el equipo corporativo de BØLG.
       </h1>
       <p className="mt-6 max-w-2xl font-bolg-body text-base normal-case tracking-normal text-bolg-text/75">
         Si necesitas algo a medida, una cotización urgente o referencias para
@@ -40,7 +40,7 @@ export default function ContactoPage() {
         />
         <ContactItem
           label="LinkedIn"
-          value="BOLG Concept"
+          value="BØLG Concept"
           href={bolgTokens.social.linkedin}
           external
         />

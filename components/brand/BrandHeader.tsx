@@ -13,7 +13,7 @@ export function BrandHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-bolg-border bg-bolg-bg/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-10">
         <Link href="/" aria-label="Volver al inicio" className="inline-flex items-center">
-          <Logo />
+          <Logo className="h-6 w-auto" />
           <span className="ml-3 hidden border-l border-bolg-border pl-3 text-xs uppercase tracking-[0.18em] text-bolg-text/60 lg:inline">
             Corporativo
           </span>

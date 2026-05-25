@@ -119,7 +119,7 @@ export const mockCorporateProducts: CorporateProduct[] = [
     id: "mock_mochila_01",
     handle: "mock-mochila-estandar",
     title: "MOCK · Mochila Estándar",
-    vendor: "BOLG",
+    vendor: "BØLG",
     category: "Mochilas",
     description:
       "Mochila urbana mock para desarrollar el configurador. Reemplazar con producto real cuando los metafields estén configurados.",
@@ -165,7 +165,7 @@ export const mockCorporateProducts: CorporateProduct[] = [
     id: "mock_botella_01",
     handle: "mock-botella-acero",
     title: "MOCK · Botella Acero 500ml",
-    vendor: "BOLG",
+    vendor: "BØLG",
     category: "Botellas",
     description:
       "Botella mock para desarrollar el configurador con grabado láser. Reemplazar con producto real.",
@@ -210,7 +210,7 @@ export const mockCorporateProducts: CorporateProduct[] = [
     id: "mock_polera_01",
     handle: "mock-polera-algodon",
     title: "MOCK · Polera Algodón",
-    vendor: "BOLG",
+    vendor: "BØLG",
     category: "Vestuario",
     description:
       "Polera mock para desarrollar DTF y serigrafía full color. Reemplazar con producto real.",

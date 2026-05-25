@@ -7,9 +7,9 @@ export function BrandFooter() {
     <footer className="mt-24 border-t border-bolg-border bg-bolg-bg">
       <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-4 lg:px-10">
         <div className="md:col-span-2">
-          <Logo />
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-bolg-text/70">
-            Plataforma corporativa de BOLG. Cotiza productos personalizados con tu logo,
+          <Logo layout="lockup" className="h-20 w-auto" />
+          <p className="mt-6 max-w-xs text-sm leading-relaxed text-bolg-text/70">
+            Plataforma corporativa de BØLG. Cotiza productos personalizados con tu logo,
             con stock real, timelines y precios por volumen.
           </p>
         </div>
@@ -40,7 +40,7 @@ export function BrandFooter() {
 
       <div className="border-t border-bolg-border">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 text-xs uppercase tracking-[0.18em] text-bolg-text/50 lg:px-10">
-          <span>© {new Date().getFullYear()} BOLG</span>
+          <span>© {new Date().getFullYear()} BØLG</span>
           <span>Hecho en Chile</span>
         </div>
       </div>

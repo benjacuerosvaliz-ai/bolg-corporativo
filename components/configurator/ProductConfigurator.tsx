@@ -3,15 +3,19 @@
 import { useMemo, useState } from "react";
 import type { CorporateProduct } from "@/lib/shopify/types";
 import { calculateLinePricing } from "@/lib/quote/pricing";
+import { analyzeStock } from "@/lib/quote/stock-analysis";
 import { VariantSelector } from "./VariantSelector";
 import { PrintAreaSelector } from "./PrintAreaSelector";
 import { PrintTechniqueSelector } from "./PrintTechniqueSelector";
 import { QuantityStepper } from "./QuantityStepper";
 import { TimelineSelector } from "./TimelineSelector";
-import { PricingPanelMini } from "./PricingPanelMini";
+import { PricingPanel } from "./PricingPanel";
+import { StockAnalysis } from "./StockAnalysis";
 
 type Props = {
   product: CorporateProduct;
+  /** Stock disponible para corporativo, pre-fetcheado server-side. */
+  inventoryByVariantId: Record<string, number>;
 };
 
 function defaultRequiredDateIso(): string {
@@ -20,7 +24,7 @@ function defaultRequiredDateIso(): string {
   return d.toISOString().slice(0, 10);
 }
 
-export function ProductConfigurator({ product }: Props) {
+export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
   const firstVariant = product.variants[0];
   const firstArea = product.printAreas[0];
   const firstTechnique = product.printTechniques[0];
@@ -32,7 +36,6 @@ export function ProductConfigurator({ product }: Props) {
   const [requiredDate, setRequiredDate] = useState<string>(defaultRequiredDateIso());
   const [occasion, setOccasion] = useState<string | null>(null);
 
-  // Si la zona cambia y la técnica actual no es compatible, ajusta a la primera compatible.
   const activeTechnique = useMemo(() => {
     const compatible = product.printTechniques.filter((t) =>
       t.availableAreaIds.includes(areaId),
@@ -54,6 +57,29 @@ export function ProductConfigurator({ product }: Props) {
       return null;
     }
   }, [product, quantity, activeTechnique]);
+
+  const stockAnalysis = useMemo(() => {
+    if (!activeTechnique) return null;
+    const inventoryAvailable = inventoryByVariantId[variantId] ?? 0;
+    try {
+      return analyzeStock({
+        inventoryAvailable,
+        requiredQuantity: quantity,
+        requiredDate: new Date(requiredDate),
+        leadTimeDaysReorder: product.leadTimeDaysReorder,
+        personalizationDays: activeTechnique.extraLeadDays,
+      });
+    } catch {
+      return null;
+    }
+  }, [
+    activeTechnique,
+    inventoryByVariantId,
+    variantId,
+    quantity,
+    requiredDate,
+    product.leadTimeDaysReorder,
+  ]);
 
   return (
     <div className="space-y-10">
@@ -96,7 +122,21 @@ export function ProductConfigurator({ product }: Props) {
         onOccasionChange={setOccasion}
       />
 
-      {pricing && <PricingPanelMini pricing={pricing} quantity={quantity} />}
+      {pricing && (
+        <PricingPanel
+          pricing={pricing}
+          quantity={quantity}
+          volumePricing={product.volumePricing}
+          onJumpToQuantity={setQuantity}
+        />
+      )}
+
+      {stockAnalysis && (
+        <StockAnalysis
+          analysis={stockAnalysis}
+          requiredDate={new Date(requiredDate)}
+        />
+      )}
 
       <button
         type="button"

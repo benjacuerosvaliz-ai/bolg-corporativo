@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { getCorporateProductByHandle } from "@/lib/shopify/storefront";
+import { getInventoryLevel } from "@/lib/shopify/admin";
 import { ProductConfigurator } from "@/components/configurator/ProductConfigurator";
 
 type Props = {
@@ -23,6 +24,16 @@ export default async function PDPPage({ params }: Props) {
   const { handle } = await params;
   const product = await getCorporateProductByHandle(handle);
   if (!product) notFound();
+
+  // Pre-fetch stock para todas las variantes. Server-side, mock por ahora.
+  // Cuando el Admin API real esté conectado, esto sigue funcionando igual.
+  const inventoryEntries = await Promise.all(
+    product.variants.map(async (v) => {
+      const level = await getInventoryLevel(v.id);
+      return [v.id, level.availableForCorporate] as const;
+    }),
+  );
+  const inventoryByVariantId = Object.fromEntries(inventoryEntries);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12 lg:px-10 lg:py-16">
@@ -72,7 +83,10 @@ export default async function PDPPage({ params }: Props) {
           </p>
 
           <div className="mt-10">
-            <ProductConfigurator product={product} />
+            <ProductConfigurator
+              product={product}
+              inventoryByVariantId={inventoryByVariantId}
+            />
           </div>
         </div>
       </div>

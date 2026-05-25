@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BOLG Corporativo
 
-## Getting Started
+Plataforma B2B de cotización corporativa para BOLG. Subdominio: `corporativo.bolg.cl`.
 
-First, run the development server:
+Conectada al Shopify principal de BOLG (Storefront + Admin API). Permite a empresas cotizar productos personalizados con su logo, ver precios por volumen, stock real y timeline de producción/entrega.
+
+## Stack
+
+- **Next.js 16** (App Router, Server Components, Server Actions) + **React 19**
+- **TypeScript estricto** (`strict`, `noUncheckedIndexedAccess`)
+- **Tailwind v4** con tokens BOLG declarados en `@theme`
+- **next/font** para Mona Sans (heading) e Inter (body, placeholder hasta resolver licencia de Basic Commercial)
+- Mock data activable con `USE_MOCK_PRODUCTS=true` mientras los metafields de Shopify se configuran
+
+## Setup local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # rellena lo que tengas, deja USE_MOCK_PRODUCTS=true
+npm run dev                   # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Estructura
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+app/                    Rutas App Router
+components/
+  brand/                Logo, BrandHeader, BrandFooter
+  ui/                   shadcn (próximas fases)
+lib/
+  brand/                bolg-tokens.ts — single source of truth de marca
+  shopify/              Clientes Storefront + Admin, tipos, mock data
+  quote/                Tipos de cotización (engine de pricing en Fase 2)
+  utils/                cn, money, rut
+public/
+  brand/                Assets de marca (logos cuando lleguen)
+docs/
+  CHANGELOG.md          Bitácora por fase
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Fases del build
 
-## Learn More
+Ver `docs/CHANGELOG.md` para el estado actual.
 
-To learn more about Next.js, take a look at the following resources:
+- **Fase 0** Setup, tokens, types, mocks, layout base ✅
+- Fase 1: Landing B2B + Catálogo
+- Fase 2: PDP + Configurador con Konva + Engine de pricing/stock
+- Fase 3: Cotizador multi-producto
+- Fase 4: PDF + Emails (Resend)
+- Fase 5: Auth magic link + Mis Cotizaciones + Link público
+- Fase 6: Draft Order en Shopify Admin + Aprobación
+- Fase 7: Polish, animaciones, tests, Lighthouse
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Notas
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Aislamiento total** vs Valiz / ORIA / Atlas / PersonalizadosLaser. Nada se comparte.
+- **Idioma:** español Chile (tú forms, nunca voseo).
+- **Push y deploy** los hace Benja manualmente — los commits locales sí los puede hacer el agente.

@@ -1,32 +1,26 @@
 /**
- * Setup de metafields corporate.* en Shopify via Admin API.
+ * Setup de metafield definitions corporate.* en Shopify via Admin API.
  *
  * Uso:
- *   1. Asegúrate de tener SHOPIFY_ADMIN_API_TOKEN en .env.local
- *      (crear custom app en Shopify Admin → docs/SHOPIFY_SETUP.md).
+ *   1. Asegúrate de tener SHOPIFY_ADMIN_CLIENT_ID + SHOPIFY_ADMIN_CLIENT_SECRET
+ *      en .env.local (de la app del Dev Dashboard).
  *   2. npm run setup:shopify
  *
- * Lo que hace:
- *   - Crea 7 metafield definitions del namespace `corporate` con visibilidad
- *     Storefront (para que el Storefront API las pueda leer).
- *   - Idempotente: si ya existen, las salta sin error.
+ * Auth: OAuth client credentials grant (apps Dev Dashboard, post-deprecación
+ * custom apps legacy en enero 2026).
  *
- * Lo que NO hace:
- *   - No popula valores en productos. Eso se hace producto-por-producto desde
- *     Shopify Admin (manualmente) o con `npm run setup:shopify -- --seed-demo`
- *     que llena 1 producto de demo con valores razonables.
+ * Idempotente: si las definitions ya existen, las salta sin error.
  */
 
-import { config } from "node:process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-// Cargar .env.local manualmente sin depender de dotenv.
 loadEnvLocal();
 
 const STORE_DOMAIN = required("SHOPIFY_STORE_DOMAIN");
-const ADMIN_TOKEN = required("SHOPIFY_ADMIN_API_TOKEN");
-const API_VERSION = process.env["SHOPIFY_API_VERSION"] ?? "2025-01";
+const CLIENT_ID = required("SHOPIFY_ADMIN_CLIENT_ID");
+const CLIENT_SECRET = required("SHOPIFY_ADMIN_CLIENT_SECRET");
+const API_VERSION = process.env["SHOPIFY_API_VERSION"] ?? "2026-04";
 const ADMIN_ENDPOINT = `https://${STORE_DOMAIN}/admin/api/${API_VERSION}/graphql.json`;
 
 type MetafieldDef = {
@@ -85,7 +79,7 @@ const DEFINITIONS: MetafieldDef[] = [
     key: "print_areas",
     namespace: "corporate",
     description:
-      'JSON array de zonas con polígonos y cm reales. Ver docs/SHOPIFY_SETUP.md.',
+      "JSON array de zonas con polígonos y cm reales. Ver docs/SHOPIFY_SETUP.md.",
     type: "json",
     visibleToStorefrontApi: true,
   },
@@ -94,13 +88,33 @@ const DEFINITIONS: MetafieldDef[] = [
     key: "print_techniques",
     namespace: "corporate",
     description:
-      'JSON array con técnicas disponibles, costos, setup y tiempos. Ver docs/SHOPIFY_SETUP.md.',
+      "JSON array con técnicas disponibles, costos, setup y tiempos. Ver docs/SHOPIFY_SETUP.md.",
     type: "json",
     visibleToStorefrontApi: true,
   },
 ];
 
+async function exchangeClientCredentials(): Promise<string> {
+  const body = new URLSearchParams({
+    grant_type: "client_credentials",
+    client_id: CLIENT_ID,
+    client_secret: CLIENT_SECRET,
+  });
+  const res = await fetch(`https://${STORE_DOMAIN}/admin/oauth/access_token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  if (!res.ok) {
+    throw new Error(`OAuth ${res.status}: ${await res.text()}`);
+  }
+  const json = (await res.json()) as { access_token: string };
+  if (!json.access_token) throw new Error("OAuth: sin access_token en respuesta.");
+  return json.access_token;
+}
+
 async function adminFetch<T>(
+  token: string,
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
@@ -108,7 +122,7 @@ async function adminFetch<T>(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Shopify-Access-Token": ADMIN_TOKEN,
+      "X-Shopify-Access-Token": token,
     },
     body: JSON.stringify({ query, variables }),
   });
@@ -121,7 +135,7 @@ async function adminFetch<T>(
   };
   if (json.errors?.length) {
     throw new Error(
-      `Shopify Admin GraphQL errors: ${json.errors.map((e) => e.message).join("; ")}`,
+      `GraphQL errors: ${json.errors.map((e) => e.message).join("; ")}`,
     );
   }
   if (!json.data) throw new Error("Sin data en response.");
@@ -145,13 +159,16 @@ const CREATE_DEFINITION = /* GraphQL */ `
   }
 `;
 
-async function createDefinition(def: MetafieldDef): Promise<void> {
+async function createDefinition(
+  token: string,
+  def: MetafieldDef,
+): Promise<void> {
   const data = await adminFetch<{
     metafieldDefinitionCreate: {
       createdDefinition: { id: string } | null;
       userErrors: { field: string[] | null; message: string; code: string }[];
     };
-  }>(CREATE_DEFINITION, {
+  }>(token, CREATE_DEFINITION, {
     definition: {
       name: def.name,
       namespace: def.namespace,
@@ -159,8 +176,10 @@ async function createDefinition(def: MetafieldDef): Promise<void> {
       description: def.description,
       type: def.type,
       ownerType: "PRODUCT",
+      // Access default: la app la crea con MERCHANT_READ_WRITE para admin
+      // (que es lo que Shopify permite a apps del Dev Dashboard) + storefront
+      // según corresponda.
       access: {
-        admin: "MERCHANT_READ_WRITE",
         storefront: def.visibleToStorefrontApi ? "PUBLIC_READ" : "NONE",
       },
     },
@@ -183,11 +202,17 @@ async function createDefinition(def: MetafieldDef): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  console.log(`\n🔧 Setup metafields en ${STORE_DOMAIN}\n`);
+  console.log(`\n🔧 Setup metafields en ${STORE_DOMAIN}`);
+  console.log(`   API version: ${API_VERSION}\n`);
 
+  console.log("→ Intercambiando client credentials por access_token…");
+  const token = await exchangeClientCredentials();
+  console.log(`  ✓ access_token obtenido (${token.slice(0, 12)}…)\n`);
+
+  console.log("→ Creando metafield definitions:");
   for (const def of DEFINITIONS) {
     try {
-      await createDefinition(def);
+      await createDefinition(token, def);
     } catch (err) {
       console.error(`  ✗ ${def.key}:`, (err as Error).message);
     }
@@ -196,7 +221,8 @@ async function main(): Promise<void> {
   console.log(
     `\n✅ Listo. Ahora configura los valores producto-por-producto en
    Shopify Admin → Products → [producto con tag CORPORATIVO] → Metafields.
-   Ejemplos de JSON en docs/SHOPIFY_SETUP.md.\n
+   Ejemplos de JSON en docs/SHOPIFY_SETUP.md.
+
    Una vez al menos 1 producto tenga todos los valores, cambia
    USE_MOCK_PRODUCTS=false y reinicia el dev server.\n`,
   );
@@ -240,6 +266,3 @@ main().catch((err) => {
   console.error("\n✗ Error fatal:", err);
   process.exit(1);
 });
-
-// Para que TS no se queje del import unused.
-void config;

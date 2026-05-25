@@ -1,15 +1,16 @@
 import "server-only";
 import { SHOPIFY_ENV, USE_MOCK_PRODUCTS, assertAdminEnv } from "./env";
+import { getAdminAccessToken } from "./admin-auth";
 
 /**
  * Cliente del Admin API de Shopify. Server-only.
  *
+ * Auth: OAuth client credentials grant (ver admin-auth.ts). Access token
+ * cacheado in-memory con TTL ~23h.
+ *
  * Usado para:
  *  - Stock real con buffers de seguridad (no expuesto vía Storefront).
  *  - Creación de Draft Orders cuando una cotización pasa a ventas.
- *
- * TODO Fase 2: implementar getInventoryLevels(variantId, locationId).
- * TODO Fase 6: implementar createDraftOrder(quote).
  */
 
 export type InventoryLevel = {
@@ -21,6 +22,56 @@ export type InventoryLevel = {
   availableForCorporate: number;
 };
 
+/** % del stock reservado para retail. Configurable a futuro vía metafield. */
+const RETAIL_RESERVE_RATIO = 0.1;
+
+const INVENTORY_QUERY = /* GraphQL */ `
+  query VariantInventory($id: ID!) {
+    productVariant(id: $id) {
+      id
+      inventoryQuantity
+      inventoryItem {
+        tracked
+      }
+    }
+  }
+`;
+
+export async function adminFetch<T>(
+  query: string,
+  variables?: Record<string, unknown>,
+): Promise<T> {
+  const token = await getAdminAccessToken();
+  const res = await fetch(adminEndpoint(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Access-Token": token,
+    },
+    body: JSON.stringify({ query, variables }),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Shopify Admin ${res.status}: ${await res.text().catch(() => "<no body>")}`,
+    );
+  }
+
+  const json = (await res.json()) as {
+    data?: T;
+    errors?: { message: string }[];
+  };
+
+  if (json.errors?.length) {
+    throw new Error(
+      `Shopify Admin GraphQL errors: ${json.errors.map((e) => e.message).join("; ")}`,
+    );
+  }
+  if (!json.data) throw new Error("Shopify Admin response sin data.");
+  return json.data;
+}
+
 export async function getInventoryLevel(
   variantId: string,
 ): Promise<InventoryLevel> {
@@ -28,7 +79,7 @@ export async function getInventoryLevel(
     // Mock determinista: variantes terminadas en "high" tienen stock alto.
     const isHighStock = variantId.includes("high");
     const available = isHighStock ? 500 : 80;
-    const reservedForRetail = Math.floor(available * 0.1);
+    const reservedForRetail = Math.floor(available * RETAIL_RESERVE_RATIO);
     return {
       variantId,
       available,
@@ -37,9 +88,19 @@ export async function getInventoryLevel(
     };
   }
   assertAdminEnv();
-  throw new Error(
-    "Admin client real todavía no implementado. Usa USE_MOCK_PRODUCTS=true para Fase 0-1.",
-  );
+
+  const data = await adminFetch<{
+    productVariant: { id: string; inventoryQuantity: number | null } | null;
+  }>(INVENTORY_QUERY, { id: variantId });
+
+  const available = data.productVariant?.inventoryQuantity ?? 0;
+  const reservedForRetail = Math.floor(Math.max(0, available) * RETAIL_RESERVE_RATIO);
+  return {
+    variantId,
+    available: Math.max(0, available),
+    reservedForRetail,
+    availableForCorporate: Math.max(0, available - reservedForRetail),
+  };
 }
 
 export function adminEndpoint(): string {

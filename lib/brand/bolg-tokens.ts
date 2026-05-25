@@ -43,9 +43,12 @@ export const bolgTokens = {
       letterSpacingEm: 0.025,
       uppercase: true,
     },
+    /**
+     * Body font de la plataforma corporativa: Inter.
+     * (bolg.cl retail usa Basic Commercial — paga; corporativo opta por Inter.)
+     */
     body: {
-      family: "Basic Commercial",
-      fallbackFamily: "Inter",
+      family: "Inter",
       weight: 400,
       baseSizePx: 16,
       lineHeight: 1.6,

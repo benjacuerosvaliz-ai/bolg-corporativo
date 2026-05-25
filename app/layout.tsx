@@ -12,9 +12,9 @@ const monaSans = Mona_Sans({
 });
 
 /**
- * Body font temporal. La fuente oficial de BOLG es Basic Commercial
- * (Linotype, no en Google Fonts). Mientras Benja resuelve la licencia
- * de Adobe Fonts o self-host, usamos Inter como fallback neutro.
+ * Inter como body font oficial de la plataforma corporativa.
+ * (En bolg.cl retail se usa Basic Commercial — paga; decisión 2026-05-25:
+ * la corporativa usa Inter, gratis y suficientemente cercana en feel.)
  */
 const bodyFont = Inter({
   variable: "--font-body",

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { bolgTokens } from "@/lib/brand/bolg-tokens";
+import { CONTACT, CONTACT_LINKS } from "@/lib/brand/contacts";
 import { Logo } from "./Logo";
 
 export function BrandFooter() {
@@ -27,7 +28,17 @@ export function BrandFooter() {
         <div>
           <h3 className="text-xs uppercase tracking-[0.18em] text-bolg-text">Contacto</h3>
           <ul className="mt-4 space-y-2 text-sm text-bolg-text/70">
-            <li><Link href="/contacto" className="transition hover:text-bolg-text">Habla con un asesor</Link></li>
+            <li>
+              <a href={CONTACT_LINKS.whatsapp} target="_blank" rel="noreferrer noopener" className="transition hover:text-bolg-text">
+                WhatsApp · {CONTACT.whatsappDisplay}
+              </a>
+            </li>
+            <li>
+              <a href={CONTACT_LINKS.mailto} className="transition hover:text-bolg-text">
+                {CONTACT.email}
+              </a>
+            </li>
+            <li><Link href="/contacto" className="transition hover:text-bolg-text">Formulario</Link></li>
             <li>
               <a href={bolgTokens.social.instagram} target="_blank" rel="noreferrer noopener" className="transition hover:text-bolg-text">Instagram</a>
             </li>

@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { listCorporateProducts } from "@/lib/shopify/storefront";
+import { getProductTotalStock } from "@/lib/shopify/admin";
 import { ProductGrid } from "@/components/catalog/ProductGrid";
 import {
   CatalogFilters,
   applyFilters,
   type CatalogSearchParams,
 } from "@/components/catalog/CatalogFilters";
+
+// Catálogo siempre dinámico para reflejar stock real + cambios de metafields
+// sin caché agresiva.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Catálogo corporativo",
@@ -21,7 +26,19 @@ export default async function CatalogoPage({
   const sp = await searchParams;
   const active = normalize(sp);
   const all = await listCorporateProducts();
-  const filtered = applyFilters(all, active);
+
+  // Pre-fetch stock total por producto (Promise.all en paralelo).
+  // Cada producto suma todas sus variantes.
+  const stockEntries = await Promise.all(
+    all.map(async (p) => {
+      const variantIds = p.variants.map((v) => v.id);
+      const total = await getProductTotalStock(variantIds);
+      return [p.id, total] as const;
+    }),
+  );
+  const stockByProductId = Object.fromEntries(stockEntries);
+
+  const filtered = applyFilters(all, active, stockByProductId);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-24">
@@ -43,7 +60,7 @@ export default async function CatalogoPage({
         <div className="lg:sticky lg:top-24 lg:self-start">
           <CatalogFilters products={all} active={active} />
         </div>
-        <ProductGrid products={filtered} />
+        <ProductGrid products={filtered} stockByProductId={stockByProductId} />
       </div>
     </div>
   );

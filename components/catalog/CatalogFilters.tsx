@@ -133,9 +133,14 @@ function buildQuery(p: CatalogSearchParams): string {
   return sp.toString();
 }
 
+/** Threshold para "stock inmediato" — alineado con ProductCard.STOCK_READY_THRESHOLD. */
+const STOCK_READY_THRESHOLD = 10;
+
 export function applyFilters(
   products: CorporateProduct[],
   p: CatalogSearchParams,
+  /** Stock total por product.id, pre-fetcheado server-side. */
+  stockByProductId: Record<string, number>,
 ): CorporateProduct[] {
   let out = [...products];
   if (p.category) out = out.filter((x) => x.category === p.category);
@@ -145,7 +150,9 @@ export function applyFilters(
     );
   }
   if (p.inStock === "ready") {
-    out = out.filter((x) => x.variants.some((v) => v.id.includes("high")));
+    out = out.filter(
+      (x) => (stockByProductId[x.id] ?? 0) > STOCK_READY_THRESHOLD,
+    );
   }
   if (p.sort === "price_asc") {
     out.sort((a, b) => firstPrice(a) - firstPrice(b));

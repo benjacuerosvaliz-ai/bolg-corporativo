@@ -107,7 +107,7 @@ export function mapShopifyProductToCorporate(
     handle: raw.handle,
     title: raw.title,
     vendor: raw.vendor,
-    category: raw.productType || "Productos",
+    category: deriveCategory(raw.productType, raw.handle),
     description: raw.description,
     descriptionHtml: raw.descriptionHtml,
     featuredImage: raw.featuredImage ?? {
@@ -126,6 +126,34 @@ export function mapShopifyProductToCorporate(
     printTechniques,
     tags: raw.tags,
   };
+}
+
+/**
+ * Categoría visible en el catálogo corporativo. Agrupa los productos de BØLG
+ * en 3 buckets simples (más usable para B2B que las categorías retail granular):
+ *
+ *   - Mochilas y Bolsos (mochilas + duffels)
+ *   - Botellas
+ *   - Accesorios (jockey + billetera + llavero + cualquier otro chico)
+ *
+ * Prioriza el handle (consistente entre productos del Shopify de BØLG) y cae
+ * al productType de Shopify como último recurso.
+ */
+function deriveCategory(productType: string, handle: string): string {
+  const h = handle.toLowerCase();
+  if (h.startsWith("mochila-") || h.startsWith("bolso-")) return "Mochilas y Bolsos";
+  if (h.startsWith("botella-")) return "Botellas";
+  if (h.startsWith("jockey-") || h.startsWith("billetera-") || h.startsWith("llavero-")) {
+    return "Accesorios";
+  }
+  // Fallback: usar productType de Shopify normalizado o "Productos"
+  const pt = productType.toLowerCase();
+  if (pt.includes("mochila") || pt.includes("bolso")) return "Mochilas y Bolsos";
+  if (pt.includes("botella")) return "Botellas";
+  if (pt.includes("jockey") || pt.includes("billetera") || pt.includes("llavero")) {
+    return "Accesorios";
+  }
+  return productType || "Productos";
 }
 
 function mapVariant(v: RawVariantEdge["node"]): ProductVariant {

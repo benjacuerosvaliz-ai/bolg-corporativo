@@ -3,9 +3,11 @@ import { ProductCard } from "./ProductCard";
 
 type Props = {
   products: CorporateProduct[];
+  /** Stock total por product.id. Pre-fetcheado server-side. */
+  stockByProductId: Record<string, number>;
 };
 
-export function ProductGrid({ products }: Props) {
+export function ProductGrid({ products, stockByProductId }: Props) {
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center border border-dashed border-bolg-border py-24 text-center">
@@ -22,7 +24,11 @@ export function ProductGrid({ products }: Props) {
   return (
     <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard
+          key={product.id}
+          product={product}
+          stockTotal={stockByProductId[product.id] ?? 0}
+        />
       ))}
     </div>
   );

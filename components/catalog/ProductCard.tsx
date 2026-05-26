@@ -6,28 +6,26 @@ import { StockBadge, type StockScenario } from "./StockBadge";
 
 type Props = {
   product: CorporateProduct;
+  /** Stock total disponible para corporativo (suma de todas las variantes). */
+  stockTotal: number;
 };
 
 /**
- * Stock scenario aproximado en Fase 1 (sin Admin API todavía).
- * Heurística: si algún variant.id incluye "high" → ready,
- *             si incluye "low" + hay otros → partial,
- *             sino → on_demand.
- *
- * En Fase 2 cuando consultamos el Admin API real, esto pasa a calcularse
- * por cantidad solicitada vs inventory level real con buffer.
+ * Threshold para considerar "stock inmediato" en el catálogo.
+ * >10 unidades libres → tenemos lo suficiente para casi cualquier cotización
+ * empezando desde el mínimo (10u). Sino se trata como "bajo pedido".
  */
-function approxStock(product: CorporateProduct): StockScenario {
-  const hasHigh = product.variants.some((v) => v.id.includes("high"));
-  const hasLow = product.variants.some((v) => v.id.includes("low"));
-  if (hasHigh && !hasLow) return "ready";
-  if (hasHigh && hasLow) return "partial";
+const STOCK_READY_THRESHOLD = 10;
+
+function stockScenario(stockTotal: number): StockScenario {
+  if (stockTotal > STOCK_READY_THRESHOLD) return "ready";
+  if (stockTotal > 0) return "partial";
   return "on_demand";
 }
 
-export function ProductCard({ product }: Props) {
+export function ProductCard({ product, stockTotal }: Props) {
   const lowestBreak = product.volumePricing[0];
-  const stock = approxStock(product);
+  const scenario = stockScenario(stockTotal);
 
   return (
     <Link
@@ -66,7 +64,7 @@ export function ProductCard({ product }: Props) {
         </div>
 
         <StockBadge
-          scenario={stock}
+          scenario={scenario}
           leadTimeDays={product.leadTimeDaysReorder}
           className="mt-2"
         />

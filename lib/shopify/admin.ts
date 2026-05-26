@@ -103,6 +103,27 @@ export async function getInventoryLevel(
   };
 }
 
+/**
+ * Stock total disponible para corporativo de un producto, sumando todas
+ * sus variantes. Útil para el catálogo (lista de productos) donde queremos
+ * mostrar un badge agregado sin importar la variante específica.
+ */
+export async function getProductTotalStock(
+  variantIds: string[],
+): Promise<number> {
+  if (USE_MOCK_PRODUCTS) {
+    return variantIds.reduce((sum, id) => {
+      const isHighStock = id.includes("high");
+      const available = isHighStock ? 500 : 80;
+      const reservedForRetail = Math.floor(available * RETAIL_RESERVE_RATIO);
+      return sum + Math.max(0, available - reservedForRetail);
+    }, 0);
+  }
+  assertAdminEnv();
+  const levels = await Promise.all(variantIds.map((id) => getInventoryLevel(id)));
+  return levels.reduce((sum, lvl) => sum + lvl.availableForCorporate, 0);
+}
+
 export function adminEndpoint(): string {
   return `https://${SHOPIFY_ENV.storeDomain}/admin/api/${SHOPIFY_ENV.apiVersion}/graphql.json`;
 }

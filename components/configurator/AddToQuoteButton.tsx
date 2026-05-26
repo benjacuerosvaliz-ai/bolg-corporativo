@@ -6,6 +6,7 @@ import type { CorporateProduct, PrintArea, PrintTechnique, ProductVariant } from
 import type { LinePricing } from "@/lib/quote/types";
 import { addLine } from "@/lib/quote/storage";
 import { formatCLP } from "@/lib/utils/money";
+import type { LogoState } from "./LogoUploader";
 
 type Props = {
   product: CorporateProduct;
@@ -16,8 +17,11 @@ type Props = {
   requiredDate: string;
   occasion: string | null;
   pricing: LinePricing | null;
-  /** Estado del logo no se persiste todavía. Cuando tengamos Vercel Blob
-      (Fase 4), guardamos la URL y los logoTransforms. */
+  /** Logo del cliente (base64 + metadata). Null si no subió logo. */
+  logo: LogoState;
+  /** Captura el mockup compuesto (producto + logo) del LivePreview. Devuelve
+      DataURL PNG o null si CORS bloquea o no hay logo. */
+  captureMockup: () => string | null;
 };
 
 type State = "idle" | "adding" | "added";
@@ -31,6 +35,8 @@ export function AddToQuoteButton({
   requiredDate,
   occasion,
   pricing,
+  logo,
+  captureMockup,
 }: Props) {
   const [state, setState] = useState<State>("idle");
 
@@ -46,6 +52,11 @@ export function AddToQuoteButton({
     if (disabled || !variant || !technique || !area || !pricing) return;
     setState("adding");
     try {
+      // Capturamos el mockup AHORA (con la posición/tamaño del logo que el
+      // cliente eligió en este momento). Si después cambia la config y agrega
+      // otra línea, esa segunda línea tendrá su propio mockup.
+      const mockupDataUrl = logo ? captureMockup() : null;
+
       addLine({
         productId: product.id,
         productHandle: product.handle,
@@ -62,6 +73,10 @@ export function AddToQuoteButton({
         requiredDate,
         occasion,
         pricing,
+        logoDataUrl: logo?.dataUrl ?? null,
+        logoFileName: logo?.fileName ?? null,
+        logoMimeType: logo?.mimeType ?? null,
+        mockupDataUrl,
       });
       setState("added");
       // Reset el botón al estado idle después de un momento para que el

@@ -59,10 +59,18 @@ const CartLineSchema = z.object({
         minQty: z.number(),
         unitPriceNet: z.number(),
         savings: z.number(),
+        savingsGross: z.number().optional(),
       })
       .nullable(),
     savingsVsBaseline: z.number(),
+    savingsVsBaselineGross: z.number().optional(),
   }),
+  // Adjuntos opcionales: logo original del cliente + mockup compuesto.
+  // base64 dataURL ("data:image/png;base64,...") o null si no hay logo.
+  logoDataUrl: z.string().nullable().optional(),
+  logoFileName: z.string().nullable().optional(),
+  logoMimeType: z.string().nullable().optional(),
+  mockupDataUrl: z.string().nullable().optional(),
 });
 
 // RUT chileno: 11.111.111-K (con o sin puntos/guión, dígito verificador 0-9 o K)
@@ -221,8 +229,15 @@ export async function submitQuoteAction(
 
   const resend = new Resend(RESEND_API_KEY);
 
+  // Construimos los attachments de logos + mockups con dedupe.
+  // - Logos: si el cliente subió el mismo archivo para varias líneas, va una
+  //   sola copia (matcheamos por dataUrl exacto).
+  // - Mockups: uno por línea (cada producto se ve distinto con el logo aplicado).
+  // Los mismos adjuntos van al cliente y al equipo BØLG.
+  const lineAttachments = buildLineAttachments(data.lines as CartLine[]);
+
   try {
-    // Email al cliente con PDF adjunto.
+    // Email al cliente con PDF adjunto + mockups + logo.
     const clientEmail = await resend.emails.send({
       from: `BØLG Corporativo <${RESEND_FROM_EMAIL}>`,
       to: data.contactEmail,
@@ -244,6 +259,7 @@ export async function submitQuoteAction(
           filename: pdfFilename,
           content: pdfBuffer,
         },
+        ...lineAttachments,
       ],
     });
 
@@ -277,6 +293,7 @@ export async function submitQuoteAction(
           filename: pdfFilename,
           content: pdfBuffer,
         },
+        ...lineAttachments,
       ],
     });
 
@@ -297,4 +314,91 @@ export async function submitQuoteAction(
   }
 
   return { ok: true, quoteNumber, dryRun: false };
+}
+
+// --- Attachments helpers ----------------------------------------------------
+
+type ResendAttachment = {
+  filename: string;
+  content: Buffer;
+};
+
+/**
+ * Convierte cada línea del carrito en sus adjuntos (mockup + logo) con dedupe.
+ *
+ *  - Mockups: 1 por línea con logo (slug del producto en el filename para que
+ *    el equipo BØLG pueda mapear rápido).
+ *  - Logos: dedupe por contenido del dataUrl. Si el cliente subió el mismo
+ *    archivo 3 veces (uso típico: mismo logo para varias líneas), va una
+ *    sola copia con nombre "logo-1.png". Si subió 2 distintos, "logo-1" y
+ *    "logo-2".
+ */
+function buildLineAttachments(lines: CartLine[]): ResendAttachment[] {
+  const attachments: ResendAttachment[] = [];
+  // Map dataUrl → ordinal asignado (1, 2, ...) para dedupe estable.
+  const logoOrdinals = new Map<string, number>();
+
+  for (const [idx, line] of lines.entries()) {
+    const lineNumber = idx + 1;
+
+    // Mockup: uno por línea (siempre distinto por la composición con el
+    // producto específico). Si captureMockup devolvió null, no agregamos.
+    if (line.mockupDataUrl) {
+      const buf = dataUrlToBuffer(line.mockupDataUrl);
+      if (buf) {
+        attachments.push({
+          filename: `L${lineNumber}-mockup-${line.productHandle}.png`,
+          content: buf,
+        });
+      }
+    }
+
+    // Logo: dedupe por contenido. Solo agregamos cuando lo vemos por primera vez.
+    if (line.logoDataUrl) {
+      if (!logoOrdinals.has(line.logoDataUrl)) {
+        const ordinal = logoOrdinals.size + 1;
+        logoOrdinals.set(line.logoDataUrl, ordinal);
+        const buf = dataUrlToBuffer(line.logoDataUrl);
+        if (buf) {
+          const ext = extFromMime(line.logoMimeType ?? null);
+          // Si hay más de un logo distinto en el carrito, los enumeramos
+          // (logo-1, logo-2). Si es único, simplemente "logo-original".
+          const baseName = lines.some(
+            (l) =>
+              l.logoDataUrl &&
+              l.logoDataUrl !== line.logoDataUrl,
+          )
+            ? `logo-${ordinal}`
+            : "logo-original";
+          attachments.push({
+            filename: `${baseName}${ext}`,
+            content: buf,
+          });
+        }
+      }
+    }
+  }
+
+  return attachments;
+}
+
+/** Parsea "data:image/png;base64,XXXX..." → Buffer. Null si formato inválido. */
+function dataUrlToBuffer(dataUrl: string): Buffer | null {
+  const match = dataUrl.match(/^data:[^;]+;base64,(.+)$/);
+  if (!match) return null;
+  try {
+    return Buffer.from(match[1]!, "base64");
+  } catch {
+    return null;
+  }
+}
+
+/** Mime → extensión con punto (".png", ".svg"). Fallback ".bin". */
+function extFromMime(mime: string | null): string {
+  if (!mime) return ".bin";
+  if (mime === "image/png") return ".png";
+  if (mime === "image/jpeg") return ".jpg";
+  if (mime === "image/svg+xml") return ".svg";
+  if (mime === "image/webp") return ".webp";
+  return ".bin";
 }

@@ -3,10 +3,21 @@
 import { useCallback, useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 
+/**
+ * Estado del logo cargado. previewUrl es para Konva/UI (object URL del browser);
+ * dataUrl es base64 que persiste en localStorage y viaja al server para
+ * adjuntarse al email. Ambos representan el mismo archivo.
+ */
+export type LogoState = {
+  previewUrl: string;
+  dataUrl: string;
+  fileName: string;
+  mimeType: string;
+} | null;
+
 type Props = {
-  /** URL local (createObjectURL) del logo subido. null si no hay. */
-  logoUrl: string | null;
-  onChange: (logoUrl: string | null, fileName: string | null) => void;
+  logo: LogoState;
+  onChange: (logo: LogoState) => void;
 };
 
 const ACCEPTED_TYPES = ["image/png", "image/svg+xml", "image/jpeg"] as const;
@@ -18,12 +29,13 @@ type ValidationError =
   | { kind: "lowres"; widthPx: number }
   | null;
 
-export function LogoUploader({ logoUrl, onChange }: Props) {
+export function LogoUploader({ logo, onChange }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<ValidationError>(null);
   const [warning, setWarning] = useState<ValidationError>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const logoUrl = logo?.previewUrl ?? null;
+  const fileName = logo?.fileName ?? null;
 
   const handleFile = useCallback(
     (file: File) => {
@@ -39,9 +51,26 @@ export function LogoUploader({ logoUrl, onChange }: Props) {
         return;
       }
 
-      const url = URL.createObjectURL(file);
-      setFileName(file.name);
-      onChange(url, file.name);
+      // Genero dos representaciones:
+      //  - previewUrl (object URL): liviano, ideal para Konva/UI
+      //  - dataUrl (base64): persiste en localStorage y se puede adjuntar
+      //    a emails server-side cuando llegue la cotización
+      const previewUrl = URL.createObjectURL(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        if (typeof dataUrl !== "string") return;
+        onChange({
+          previewUrl,
+          dataUrl,
+          fileName: file.name,
+          mimeType: file.type,
+        });
+      };
+      reader.onerror = () => {
+        setError({ kind: "type", received: "no se pudo leer el archivo" });
+      };
+      reader.readAsDataURL(file);
 
       // Para PNG/JPG verificamos resolución mínima recomendada (1000px).
       // SVG es vectorial — siempre OK.
@@ -52,7 +81,7 @@ export function LogoUploader({ logoUrl, onChange }: Props) {
             setWarning({ kind: "lowres", widthPx: img.width });
           }
         };
-        img.src = url;
+        img.src = previewUrl;
       }
     },
     [onChange],
@@ -69,8 +98,7 @@ export function LogoUploader({ logoUrl, onChange }: Props) {
 
   const remove = () => {
     if (logoUrl) URL.revokeObjectURL(logoUrl);
-    onChange(null, null);
-    setFileName(null);
+    onChange(null);
     setError(null);
     setWarning(null);
   };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { CorporateProduct } from "@/lib/shopify/types";
 import { calculateLinePricing } from "@/lib/quote/pricing";
 import { analyzeStock } from "@/lib/quote/stock-analysis";
@@ -11,8 +11,8 @@ import { QuantityStepper } from "./QuantityStepper";
 import { DateSelector, OccasionSelector } from "./TimelineSelector";
 import { PricingPanel } from "./PricingPanel";
 import { StockAnalysis } from "./StockAnalysis";
-import { LogoUploader } from "./LogoUploader";
-import { LivePreview } from "./LivePreview";
+import { LogoUploader, type LogoState } from "./LogoUploader";
+import { LivePreview, type LivePreviewHandle } from "./LivePreview";
 import { AddToQuoteButton } from "./AddToQuoteButton";
 
 type Props = {
@@ -37,7 +37,11 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
   const [quantity, setQuantity] = useState<number>(product.minQty);
   const [requiredDate, setRequiredDate] = useState<string>(defaultRequiredDateIso());
   const [occasion, setOccasion] = useState<string | null>(null);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logo, setLogo] = useState<LogoState>(null);
+
+  // Ref al LivePreview para capturar el mockup compuesto (producto + logo)
+  // al momento de agregar la línea al carrito. Ver LivePreviewHandle.
+  const previewRef = useRef<LivePreviewHandle | null>(null);
 
   const selectedVariant = useMemo(
     () => product.variants.find((v) => v.id === variantId) ?? firstVariant ?? null,
@@ -115,10 +119,11 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
       {/* Columna izquierda: preview Konva sticky */}
       <div className="lg:sticky lg:top-24 lg:self-start">
         <LivePreview
+          ref={previewRef}
           productImage={previewImage}
           allImages={product.images.length > 0 ? product.images : [product.featuredImage]}
           area={selectedArea}
-          logoUrl={logoUrl}
+          logoUrl={logo?.previewUrl ?? null}
         />
       </div>
 
@@ -126,10 +131,7 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
       <div className="space-y-10">
         {/* Paso 1: sube tu logo. Lo ponemos primero porque el preview live se
             activa apenas subes el archivo y motiva al cliente a explorar. */}
-        <LogoUploader
-          logoUrl={logoUrl}
-          onChange={(url) => setLogoUrl(url)}
-        />
+        <LogoUploader logo={logo} onChange={setLogo} />
 
         {product.variants.length > 0 && (
           <VariantSelector
@@ -200,6 +202,8 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
           requiredDate={requiredDate}
           occasion={occasion}
           pricing={pricing}
+          logo={logo}
+          captureMockup={() => previewRef.current?.captureMockup() ?? null}
         />
       </div>
     </div>

@@ -41,6 +41,23 @@ export type CartLine = {
   occasion: string | null;
   /** Snapshot del cálculo al momento de agregar. */
   pricing: LinePricing;
+  /**
+   * Logo del cliente — file original convertido a base64 data URL. Se guarda
+   * para enviarlo al equipo BØLG como adjunto del email de cotización.
+   * null si el cliente no subió logo (es opcional en la PDP).
+   */
+  logoDataUrl: string | null;
+  /** Nombre original del archivo (ej. "miempresa-logo.svg") para naming del adjunto. */
+  logoFileName: string | null;
+  /** MIME type del logo (image/svg+xml, image/png, etc.) para naming + content-type. */
+  logoMimeType: string | null;
+  /**
+   * Mockup compuesto — captura PNG del LivePreview con el logo aplicado sobre
+   * el producto (posición + escala que el cliente eligió). Se genera vía
+   * konva stage.toDataURL al hacer "agregar a cotización".
+   * null si no había logo (no tiene sentido capturar el producto sin nada encima).
+   */
+  mockupDataUrl: string | null;
 };
 
 // --- I/O --------------------------------------------------------------------

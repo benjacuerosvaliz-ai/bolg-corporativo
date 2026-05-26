@@ -1,10 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Stage, Layer, Image as KonvaImage, Transformer } from "react-konva";
 import type Konva from "konva";
 import type { PrintArea, ShopifyImage } from "@/lib/shopify/types";
 import { cn } from "@/lib/utils/cn";
+
+/**
+ * Handle imperativo expuesto al parent (ProductConfigurator) para capturar
+ * el mockup compuesto al momento de agregar la línea al carrito. La captura
+ * mergea el producto (img HTML normal) + el logo (Konva stage) en un canvas
+ * temporal porque hoy son dos capas separadas en el DOM.
+ *
+ * Returns DataURL PNG o null si no hay logo / la captura falló (ej. CORS).
+ */
+export type LivePreviewHandle = {
+  captureMockup: () => string | null;
+};
 
 type Props = {
   /** Imagen "preferida" para arrancar (definida por la zona seleccionada o la principal). */
@@ -62,7 +81,8 @@ function initialLogoBox(logoImg: HTMLImageElement): LogoBox {
   };
 }
 
-export function LivePreview({ productImage, allImages, area, logoUrl }: Props) {
+export const LivePreview = forwardRef<LivePreviewHandle, Props>(
+  function LivePreview({ productImage, allImages, area, logoUrl }, ref) {
   const logoImg = useHtmlImage(logoUrl);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState<number>(CANVAS_SIZE);
@@ -91,6 +111,11 @@ export function LivePreview({ productImage, allImages, area, logoUrl }: Props) {
   useEffect(() => {
     setActiveImageUrl(productImage.url);
   }, [productImage.url]);
+
+  // Versión HTMLImageElement (CORS-aware) del producto. La usa el captureMockup
+  // para dibujar en el canvas temporal — el <img> visible del DOM no nos sirve
+  // porque no podemos garantizar que tenga crossOrigin habilitado.
+  const productImg = useHtmlImage(activeImageUrl);
 
   // ResizeObserver para hacer responsive el Stage interno.
   useEffect(() => {
@@ -136,6 +161,58 @@ export function LivePreview({ productImage, allImages, area, logoUrl }: Props) {
   const resetLogo = () => {
     if (logoImg) setLogoBox(initialLogoBox(logoImg));
   };
+
+  // Captura del mockup compuesto (producto + logo) a un canvas temporal y
+  // devuelve DataURL PNG. Se invoca desde el padre vía ref al momento de
+  // agregar la línea al carrito.
+  useImperativeHandle(
+    ref,
+    () => ({
+      captureMockup() {
+        if (!productImg || !logoImg || !logoBox) return null;
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = CANVAS_SIZE;
+          canvas.height = CANVAS_SIZE;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return null;
+
+          // Fondo del slot (mismo color que el container visible) para que el
+          // mockup no quede transparente si el producto no llena el cuadrado.
+          ctx.fillStyle = "#f6f6f3";
+          ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+          // Producto con object-contain: respeta aspect ratio, se centra
+          drawContained(ctx, productImg, CANVAS_SIZE, CANVAS_SIZE);
+
+          // Logo con rotación: trasladamos al centro del logo, rotamos,
+          // dibujamos centrado en 0,0
+          ctx.save();
+          ctx.translate(
+            logoBox.x + logoBox.width / 2,
+            logoBox.y + logoBox.height / 2,
+          );
+          ctx.rotate((logoBox.rotation * Math.PI) / 180);
+          ctx.drawImage(
+            logoImg,
+            -logoBox.width / 2,
+            -logoBox.height / 2,
+            logoBox.width,
+            logoBox.height,
+          );
+          ctx.restore();
+
+          return canvas.toDataURL("image/png");
+        } catch (err) {
+          // Si Shopify CDN no devuelve CORS, toDataURL lanza SecurityError.
+          // En ese caso devolvemos null y el flujo sigue sin mockup adjunto.
+          console.warn("[LivePreview] captureMockup failed:", err);
+          return null;
+        }
+      },
+    }),
+    [productImg, logoImg, logoBox],
+  );
 
   return (
     <div className="space-y-3">
@@ -288,4 +365,35 @@ export function LivePreview({ productImage, allImages, area, logoUrl }: Props) {
       )}
     </div>
   );
+});
+
+/**
+ * Dibuja una imagen sobre un canvas respetando aspect ratio (object-contain).
+ * Centra horizontal/verticalmente según corresponda. Idéntico al comportamiento
+ * del <img className="object-contain"> que el cliente ve en pantalla.
+ */
+function drawContained(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  canvasW: number,
+  canvasH: number,
+): void {
+  const imgAspect = img.naturalWidth / img.naturalHeight;
+  const canvasAspect = canvasW / canvasH;
+  let drawW: number;
+  let drawH: number;
+  let dx: number;
+  let dy: number;
+  if (imgAspect > canvasAspect) {
+    drawW = canvasW;
+    drawH = canvasW / imgAspect;
+    dx = 0;
+    dy = (canvasH - drawH) / 2;
+  } else {
+    drawH = canvasH;
+    drawW = canvasH * imgAspect;
+    dx = (canvasW - drawW) / 2;
+    dy = 0;
+  }
+  ctx.drawImage(img, dx, dy, drawW, drawH);
 }

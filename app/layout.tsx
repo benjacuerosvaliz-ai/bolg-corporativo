@@ -33,9 +33,11 @@ export const metadata: Metadata = {
     process.env["NEXT_PUBLIC_SITE_URL"] ?? "https://corporativo.bolg.cl",
   ),
   // OpenGraph + Twitter cards para previews al compartir el link (WhatsApp,
-  // LinkedIn, Twitter, etc.). La imagen la sirve automáticamente Next.js
-  // desde app/opengraph-image.png y app/twitter-image.png — sólo necesitamos
-  // los campos textuales para que el copy del preview sea correcto.
+  // LinkedIn, Twitter, etc.). La imagen vive en /public/og/ — declararla acá
+  // en lugar de app/opengraph-image.png hace que TODAS las rutas hijas la
+  // hereden vía metadata composition. Si pusiéramos el archivo en app/, sólo
+  // serviría para la ruta raíz y /catalogo, /como-funciona, etc. quedarían
+  // sin preview (cada segmento necesitaría su propio archivo).
   openGraph: {
     type: "website",
     locale: "es_CL",
@@ -43,12 +45,21 @@ export const metadata: Metadata = {
     title: "BØLG Corporativo — Regalos corporativos personalizados",
     description:
       "Mochilas, botellas y accesorios BØLG personalizados con tu logo. Precios por volumen, stock real y preview de cómo se ve antes de aprobar.",
+    images: [
+      {
+        url: "/og/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "BØLG Corporativo",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "BØLG Corporativo — Regalos corporativos personalizados",
     description:
       "Mochilas, botellas y accesorios BØLG personalizados con tu logo. Precios por volumen, stock real y preview de cómo se ve antes de aprobar.",
+    images: ["/og/twitter-image.png"],
   },
 };
 

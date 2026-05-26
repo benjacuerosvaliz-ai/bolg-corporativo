@@ -18,6 +18,15 @@ export function VariantSelector({ variants, selectedId, onChange }: Props) {
   const selected = variants.find((v) => v.id === selectedId);
   if (!selected) return null;
 
+  // Esconder cuando es una sola variante "Default Title" (productos sin
+  // variantes reales en Shopify, solo el wrapper que se autogenera).
+  const isOnlyDefault =
+    variants.length === 1 &&
+    variants[0]?.selectedOptions.every(
+      (o) => o.name.toLowerCase() === "title" && o.value === "Default Title",
+    );
+  if (isOnlyDefault) return null;
+
   const optionNames = Array.from(
     new Set(variants.flatMap((v) => v.selectedOptions.map((o) => o.name))),
   );

@@ -111,21 +111,24 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-      {/* Columna izquierda: preview Konva + logo uploader */}
-      <div className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+      {/* Columna izquierda: preview Konva sticky */}
+      <div className="lg:sticky lg:top-24 lg:self-start">
         <LivePreview
           productImage={previewImage}
           area={selectedArea}
           logoUrl={logoUrl}
         />
+      </div>
+
+      {/* Columna derecha: logo + selectores + pricing + stock */}
+      <div className="space-y-10">
+        {/* Paso 1: sube tu logo. Lo ponemos primero porque el preview live se
+            activa apenas subes el archivo y motiva al cliente a explorar. */}
         <LogoUploader
           logoUrl={logoUrl}
           onChange={(url) => setLogoUrl(url)}
         />
-      </div>
 
-      {/* Columna derecha: selectores + pricing + stock */}
-      <div className="space-y-10">
         {product.variants.length > 0 && (
           <VariantSelector
             variants={product.variants}

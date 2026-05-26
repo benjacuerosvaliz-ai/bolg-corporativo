@@ -10,6 +10,10 @@ type Props = {
 };
 
 export function PrintAreaSelector({ areas, selectedId, onChange }: Props) {
+  // Una sola zona → no hay nada que elegir, la seleccionamos por default
+  // y escondemos el selector para no aturdir al cliente.
+  if (areas.length <= 1) return null;
+
   return (
     <div>
       <h4 className="text-xs uppercase tracking-[0.2em] text-bolg-text/60">

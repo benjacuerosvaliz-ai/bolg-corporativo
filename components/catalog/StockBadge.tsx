@@ -21,7 +21,9 @@ export function StockBadge({ scenario, leadTimeDays, className }: Props) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-bolg-text/70",
+        // Tracking más cerrado en mobile para que "Bajo pedido · 150 d" quepa
+        // en una sola línea dentro del ancho de media columna.
+        "inline-flex items-center gap-1.5 text-[9px] uppercase tracking-[0.14em] text-bolg-text/70 sm:gap-2 sm:text-[10px] sm:tracking-[0.2em]",
         className,
       )}
     >

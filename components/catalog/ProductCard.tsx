@@ -30,35 +30,38 @@ export function ProductCard({ product, stockTotal }: Props) {
   return (
     <Link
       href={`/catalogo/${product.handle}` as never}
-      className="group flex flex-col gap-4"
+      className="group flex flex-col gap-3 sm:gap-4"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-bolg-image-bg-light">
         <Image
           src={product.featuredImage.url}
           alt={product.featuredImage.altText ?? product.title}
           fill
-          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 50vw"
           className="object-cover transition duration-500 group-hover:scale-[1.02]"
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-bolg-text/50">
+      <div className="flex flex-col gap-1.5 sm:gap-2">
+        <p className="text-[9px] uppercase tracking-[0.18em] text-bolg-text/50 sm:text-[10px] sm:tracking-[0.2em]">
           {product.category}
         </p>
-        <h3 className="font-bolg-heading text-base uppercase tracking-[0.08em] text-bolg-text">
+        <h3 className="font-bolg-heading text-sm uppercase tracking-[0.06em] text-bolg-text sm:text-base sm:tracking-[0.08em]">
           {product.title}
         </h3>
 
-        <div className="mt-1 flex items-center justify-between gap-3">
-          <p className="font-bolg-body text-sm normal-case tracking-normal text-bolg-text/80">
+        {/* Mobile: stack vertical (precio arriba, Mín abajo más chico).
+            Desktop: lado a lado en una línea. Evita ahorcar el precio en el
+            ancho de media columna de mobile (~165px). */}
+        <div className="mt-1 flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+          <p className="font-bolg-body text-xs normal-case tracking-normal text-bolg-text/80 sm:text-sm">
             Desde{" "}
             <span className="font-medium text-bolg-text">
               {lowestBreak ? formatCLP(lowestBreak.unitPriceNet) : "—"}
             </span>
-            <span className="text-bolg-text/60"> / unidad</span>
+            <span className="text-bolg-text/60"> / u</span>
           </p>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-bolg-text/50">
+          <p className="text-[9px] uppercase tracking-[0.18em] text-bolg-text/50 sm:text-[10px] sm:tracking-[0.2em]">
             Mín {product.minQty}
           </p>
         </div>
@@ -66,7 +69,7 @@ export function ProductCard({ product, stockTotal }: Props) {
         <StockBadge
           scenario={scenario}
           leadTimeDays={product.leadTimeDaysReorder}
-          className="mt-2"
+          className="mt-1.5 sm:mt-2"
         />
       </div>
     </Link>

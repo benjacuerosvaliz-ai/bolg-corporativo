@@ -31,6 +31,7 @@ const CLIENTS: readonly Client[] = [
   { name: "Monsanto", logoSlug: "monsanto" },
   { name: "Viña Ventisquero", logoSlug: "ventisquero" },
   { name: "Check Fast Cherry", logoSlug: "check-fast-cherry" },
+  { name: "MyPYMES Chilenas", logoSlug: "mypymes" },
 ];
 
 const VALUE_PROPS = [
@@ -100,11 +101,6 @@ export default function CasosDeExitoPage() {
                 )}
               </article>
             ))}
-            <article className="flex h-40 items-center justify-center bg-bolg-text p-6 text-center text-bolg-button-text lg:h-48 lg:p-8">
-              <p className="font-bolg-heading text-base uppercase tracking-[0.15em] sm:text-lg">
-                + micro empresas
-              </p>
-            </article>
           </div>
         </div>
       </section>

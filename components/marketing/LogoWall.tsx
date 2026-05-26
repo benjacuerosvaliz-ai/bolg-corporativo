@@ -17,6 +17,7 @@ const CLIENTS: readonly { slug: string; name: string }[] = [
   { slug: "monsanto", name: "Monsanto" },
   { slug: "ventisquero", name: "Viña Ventisquero" },
   { slug: "check-fast-cherry", name: "Check Fast Cherry" },
+  { slug: "mypymes", name: "MyPYMES Chilenas" },
 ];
 
 export function LogoWall() {
@@ -42,12 +43,6 @@ export function LogoWall() {
               />
             </div>
           ))}
-          {/* Sexta celda: tile decorativo en negro como CTA "y más" */}
-          <div className="flex h-24 items-center justify-center bg-bolg-text px-4 text-center">
-            <p className="font-bolg-heading text-xs uppercase tracking-[0.18em] text-bolg-button-text/85 sm:text-sm">
-              + micro empresas
-            </p>
-          </div>
         </div>
       </div>
     </section>

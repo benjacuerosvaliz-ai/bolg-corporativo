@@ -94,9 +94,11 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
   ]);
 
   // Imagen del producto que se muestra en el LivePreview.
-  // Prioriza la imagen de la variante seleccionada, luego la imagen de la zona, luego la principal.
+  // Si la zona tiene imageUrl real (https://...), úsala; sino fallback a la
+  // variante o la featured. Algunos productos no van a tener imágenes por zona
+  // configuradas hasta que el equipo suba fotos de cada ángulo a Shopify CDN.
   const previewImage = useMemo(() => {
-    if (selectedArea?.imageUrl) {
+    if (selectedArea?.imageUrl?.includes("cdn.shopify.com/s/")) {
       return {
         url: selectedArea.imageUrl,
         altText: `${product.title} · ${selectedArea.label}`,

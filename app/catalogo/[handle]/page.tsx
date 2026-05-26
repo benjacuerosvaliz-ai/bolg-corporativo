@@ -5,6 +5,10 @@ import { getCorporateProductByHandle } from "@/lib/shopify/storefront";
 import { getInventoryLevel } from "@/lib/shopify/admin";
 import { ProductConfigurator } from "@/components/configurator/ProductConfigurator";
 
+// La PDP siempre dinámica: stock + metafields cambian, y queremos que el
+// switch USE_MOCK_PRODUCTS=true/false no quede atrapado en cache estática.
+export const dynamic = "force-dynamic";
+
 type Props = {
   params: Promise<{ handle: string }>;
 };

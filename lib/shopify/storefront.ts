@@ -35,7 +35,7 @@ async function storefrontFetch<T>(
       "X-Shopify-Storefront-Access-Token": SHOPIFY_ENV.storefrontToken,
     },
     body: JSON.stringify({ query, variables }),
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -67,7 +67,20 @@ export async function listCorporateProducts(): Promise<CorporateProduct[]> {
     products: { edges: { node: RawShopifyProduct }[] };
   }>(LIST_CORPORATE_PRODUCTS, { first: 50 });
 
-  return data.products.edges.map((e) => mapShopifyProductToCorporate(e.node));
+  // Tolerante en bulk: filtra productos sin metafields completos con warn
+  // server-side. Productos individuales (getCorporateProductByHandle) siguen
+  // estrictos para que el dev sepa exactamente qué configurar.
+  const out: CorporateProduct[] = [];
+  for (const edge of data.products.edges) {
+    try {
+      out.push(mapShopifyProductToCorporate(edge.node));
+    } catch (err) {
+      console.warn(
+        `[catalogo] Skipping ${edge.node.handle}: ${(err as Error).message}`,
+      );
+    }
+  }
+  return out;
 }
 
 export async function getCorporateProductByHandle(

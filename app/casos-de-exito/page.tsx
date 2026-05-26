@@ -21,21 +21,16 @@ export const metadata: Metadata = {
 
 type Client = {
   name: string;
-  industry: string;
   /** Slug del logo en /public/clients/{slug}.png. Si null, fallback tipográfico. */
   logoSlug: string | null;
 };
 
 const CLIENTS: readonly Client[] = [
-  { name: "Bayer", industry: "Farmacéutica multinacional", logoSlug: "bayer" },
-  { name: "Astara", industry: "Automotriz", logoSlug: "astara" },
-  { name: "Monsanto", industry: "Agroindustria", logoSlug: "monsanto" },
-  { name: "Viña Ventisquero", industry: "Vinos", logoSlug: "ventisquero" },
-  {
-    name: "Check Fast Cherry",
-    industry: "Exportación frutícola",
-    logoSlug: "check-fast-cherry",
-  },
+  { name: "Bayer", logoSlug: "bayer" },
+  { name: "Astara", logoSlug: "astara" },
+  { name: "Monsanto", logoSlug: "monsanto" },
+  { name: "Viña Ventisquero", logoSlug: "ventisquero" },
+  { name: "Check Fast Cherry", logoSlug: "check-fast-cherry" },
 ];
 
 const VALUE_PROPS = [
@@ -78,47 +73,36 @@ export default function CasosDeExitoPage() {
             quieren regalar bien sin perder el toque.
           </p>
 
+          {/*
+            Grilla "logo wall" estilo galería: sólo los logos, sin captions.
+            Decisión de Benja: cuando el logo es reconocible (Bayer, Monsanto,
+            etc.), el nombre/industria al pie sólo agrega ruido. La sexta celda
+            queda como CTA tipográfico para representar las micro empresas.
+          */}
           <div className="mt-12 grid gap-px overflow-hidden border border-bolg-border bg-bolg-border sm:grid-cols-2 lg:grid-cols-3 lg:mt-16">
             {CLIENTS.map((c) => (
               <article
                 key={c.name}
-                className="flex h-48 flex-col bg-bolg-image-bg-light lg:h-56"
+                className="relative flex h-40 items-center justify-center bg-bolg-image-bg-light p-8 lg:h-48 lg:p-12"
               >
-                {/* Logo arriba: contenedor con altura fija + object-contain para
-                    que respete proporción. mix-blend-multiply quita el fondo
-                    blanco visualmente cuando el JPG/PNG no es transparente. */}
-                <div className="relative flex-1 p-6 lg:p-8">
-                  {c.logoSlug ? (
-                    <Image
-                      src={`/clients/${c.logoSlug}.png`}
-                      alt={`Logo ${c.name}`}
-                      fill
-                      sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
-                      className="object-contain p-4"
-                    />
-                  ) : (
-                    <p className="font-bolg-heading text-xl uppercase tracking-[0.1em] text-bolg-text sm:text-2xl">
-                      {c.name}
-                    </p>
-                  )}
-                </div>
-                {/* Footer textual con nombre + industria */}
-                <div className="border-t border-bolg-border/60 bg-bolg-bg/50 px-6 py-3 lg:px-8">
-                  <p className="font-bolg-body text-sm tracking-normal text-bolg-text">
+                {c.logoSlug ? (
+                  <Image
+                    src={`/clients/${c.logoSlug}.png`}
+                    alt={`Logo ${c.name}`}
+                    fill
+                    sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+                    className="object-contain p-6 lg:p-10"
+                  />
+                ) : (
+                  <p className="font-bolg-heading text-xl uppercase tracking-[0.1em] text-bolg-text sm:text-2xl">
                     {c.name}
                   </p>
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-bolg-text/50">
-                    {c.industry}
-                  </p>
-                </div>
+                )}
               </article>
             ))}
-            <article className="flex h-48 flex-col justify-end bg-bolg-text p-6 text-bolg-button-text lg:h-56 lg:p-8">
-              <p className="font-bolg-heading text-xl uppercase tracking-[0.1em] sm:text-2xl">
+            <article className="flex h-40 items-center justify-center bg-bolg-text p-6 text-center text-bolg-button-text lg:h-48 lg:p-8">
+              <p className="font-bolg-heading text-base uppercase tracking-[0.15em] sm:text-lg">
                 + micro empresas
-              </p>
-              <p className="mt-2 text-[10px] uppercase tracking-[0.22em] opacity-70">
-                Startups · PyMEs · Estudios
               </p>
             </article>
           </div>

@@ -293,10 +293,10 @@ export function QuoteCreated({
                           ¿Necesitas ajustar algo? Responde este correo y nos
                           coordinamos directamente. También puedes escribir a{" "}
                           <a
-                            href="mailto:cotizaciones@bolg.cl"
+                            href="mailto:benjamin@bolg.cl"
                             style={{ color: palette.accent, textDecoration: "none" }}
                           >
-                            cotizaciones@bolg.cl
+                            benjamin@bolg.cl
                           </a>
                           .
                         </p>

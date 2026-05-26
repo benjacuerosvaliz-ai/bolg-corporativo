@@ -116,11 +116,13 @@ function generateQuoteNumber(now: Date = new Date()): string {
 // --- Resend setup -----------------------------------------------------------
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_FROM_EMAIL =
-  process.env.RESEND_FROM_EMAIL || "cotizaciones@bolg.cl";
 // benjamin@bolg.cl: alias en Cloudflare Email Routing que reenvía a Gmail.
-// Cuando exista un correo profesional propio del equipo comercial, lo cambiamos
-// vía env var sin tocar código.
+// Lo usamos como FROM y como destino interno para que no haya buzones
+// huérfanos: todo lo que reciba este alias llega al Gmail del fundador.
+// Cuando exista un buzón comercial propio (ej: ventas@bolg.cl), lo cambiamos
+// vía env vars sin tocar código.
+const RESEND_FROM_EMAIL =
+  process.env.RESEND_FROM_EMAIL || "benjamin@bolg.cl";
 const RESEND_INTERNAL_EMAIL =
   process.env.RESEND_INTERNAL_EMAIL || "benjamin@bolg.cl";
 const VALIDITY_DAYS = 15;
@@ -200,7 +202,7 @@ export async function submitQuoteAction(
       ok: false,
       errors: {},
       formError:
-        "No pudimos generar el PDF de la cotización. Inténtalo de nuevo o escríbenos a cotizaciones@bolg.cl.",
+        "No pudimos generar el PDF de la cotización. Inténtalo de nuevo o escríbenos a benjamin@bolg.cl.",
     };
   }
 
@@ -289,7 +291,7 @@ export async function submitQuoteAction(
       ok: false,
       errors: {},
       formError:
-        "Tu cotización se generó pero el envío del email falló. Escríbenos a cotizaciones@bolg.cl mencionando este código: " +
+        "Tu cotización se generó pero el envío del email falló. Escríbenos a benjamin@bolg.cl mencionando este código: " +
         quoteNumber,
     };
   }

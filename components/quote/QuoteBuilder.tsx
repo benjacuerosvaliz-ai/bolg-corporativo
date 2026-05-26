@@ -1,13 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/lib/quote/use-cart";
 import { removeLine, clearCart, updateLine, type CartLine } from "@/lib/quote/storage";
 import { formatCLP, IVA_RATE } from "@/lib/utils/money";
+import { QuoteSubmitDrawer } from "./QuoteSubmitDrawer";
 
 export function QuoteBuilder() {
   const { lines, count, ready } = useCart();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   if (!ready) {
     return (
@@ -78,17 +81,22 @@ export function QuoteBuilder() {
 
           <button
             type="button"
-            disabled
-            title="Disponible en Fase 4 (Resend + Draft Order)"
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-bolg-button bg-bolg-button px-6 py-4 text-xs uppercase tracking-[0.2em] text-bolg-button-text opacity-60"
+            onClick={() => setDrawerOpen(true)}
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-bolg-button bg-bolg-button px-6 py-4 text-xs uppercase tracking-[0.2em] text-bolg-button-text transition hover:opacity-90"
           >
             Solicitar cotización formal
           </button>
           <p className="mt-3 text-center text-[10px] uppercase tracking-[0.18em] text-bolg-text/40">
-            Envío al equipo comercial · Fase 4
+            Te enviamos PDF + nos contactamos el mismo día hábil
           </p>
         </div>
       </div>
+
+      <QuoteSubmitDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        lines={lines}
+      />
     </div>
   );
 }

@@ -1,19 +1,16 @@
 /**
- * FAQ B2B.
- *
- * TODO Benja: revisar copy de cada respuesta y ajustar a tu realidad
- * operacional (plazos exactos de producción, condiciones de pago,
- * política de devolución, etc.). Las respuestas actuales son defaults
- * razonables basados en el brief y los metafields del mock.
+ * FAQ B2B. Copy alineado con la página /como-funciona y el PDF de cotización.
+ * Source of truth para condiciones comerciales: mínimo 10 unidades, lead time
+ * de reposición ~150 días, pago 50/50, factura electrónica.
  */
 const FAQS = [
   {
     q: "¿Cuál es el mínimo de pedido?",
-    a: "El mínimo varía por producto y está indicado en cada ficha del catálogo. En general partimos en 50 unidades para mochilas y vestuario, y 100 unidades para botellas.",
+    a: "El mínimo es 10 unidades por producto. Puedes combinar varios productos distintos en una sola cotización para llegar a volúmenes mayores y aprovechar tramos de precio.",
   },
   {
     q: "¿Cuánto se demora la producción?",
-    a: "Si el producto está en stock, la personalización toma entre 7 y 15 días hábiles según la técnica. Si necesitas más unidades de las que tenemos en bodega, hacemos reposición desde origen con un lead time aproximado de 60 a 75 días. La ficha de cada producto calcula automáticamente el timeline real para tu cantidad y fecha objetivo.",
+    a: "Si el producto está en stock, la personalización toma entre 7 y 15 días hábiles según la técnica. Si necesitas más unidades de las que tenemos en bodega, hacemos reposición desde origen con un lead time aproximado de 150 días desde la orden de compra. La ficha de cada producto calcula automáticamente el timeline real para tu cantidad y fecha objetivo.",
   },
   {
     q: "¿Qué técnicas de personalización ofrecen?",

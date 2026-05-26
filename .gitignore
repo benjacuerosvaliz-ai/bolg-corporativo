@@ -38,6 +38,9 @@ yarn-error.log*
 *.local.ts
 *.local.json
 
+# backups locales de assets antes de procesarlos
+**/_originales/
+
 # vercel
 .vercel
 

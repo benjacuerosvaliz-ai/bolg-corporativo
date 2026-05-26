@@ -22,35 +22,19 @@ export const metadata: Metadata = {
 type Client = {
   name: string;
   industry: string;
-  /** Slug + extensión del logo en /public/clients/. Si null, fallback a wordmark tipográfico. */
-  logo: { slug: string; ext: "png" | "jpg" | "webp" } | null;
+  /** Slug del logo en /public/clients/{slug}.png. Si null, fallback tipográfico. */
+  logoSlug: string | null;
 };
 
 const CLIENTS: readonly Client[] = [
-  {
-    name: "Bayer",
-    industry: "Farmacéutica multinacional",
-    logo: { slug: "bayer", ext: "png" },
-  },
-  {
-    name: "Astara",
-    industry: "Automotriz",
-    logo: { slug: "astara", ext: "jpg" },
-  },
-  {
-    name: "Monsanto",
-    industry: "Agroindustria",
-    logo: { slug: "monsanto", ext: "png" },
-  },
-  {
-    name: "Viña Ventisquero",
-    industry: "Vinos",
-    logo: { slug: "ventisquero", ext: "webp" },
-  },
+  { name: "Bayer", industry: "Farmacéutica multinacional", logoSlug: "bayer" },
+  { name: "Astara", industry: "Automotriz", logoSlug: "astara" },
+  { name: "Monsanto", industry: "Agroindustria", logoSlug: "monsanto" },
+  { name: "Viña Ventisquero", industry: "Vinos", logoSlug: "ventisquero" },
   {
     name: "Check Fast Cherry",
     industry: "Exportación frutícola",
-    logo: { slug: "check-fast-cherry", ext: "png" },
+    logoSlug: "check-fast-cherry",
   },
 ];
 
@@ -104,13 +88,13 @@ export default function CasosDeExitoPage() {
                     que respete proporción. mix-blend-multiply quita el fondo
                     blanco visualmente cuando el JPG/PNG no es transparente. */}
                 <div className="relative flex-1 p-6 lg:p-8">
-                  {c.logo ? (
+                  {c.logoSlug ? (
                     <Image
-                      src={`/clients/${c.logo.slug}.${c.logo.ext}`}
+                      src={`/clients/${c.logoSlug}.png`}
                       alt={`Logo ${c.name}`}
                       fill
                       sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
-                      className="object-contain p-4 mix-blend-multiply"
+                      className="object-contain p-4"
                     />
                   ) : (
                     <p className="font-bolg-heading text-xl uppercase tracking-[0.1em] text-bolg-text sm:text-2xl">

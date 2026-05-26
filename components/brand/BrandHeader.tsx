@@ -1,5 +1,5 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Logo } from "./Logo";
 import { MobileMenu } from "./MobileMenu";
 import { QuoteBadge } from "./QuoteBadge";
 
@@ -14,11 +14,21 @@ export function BrandHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-bolg-border bg-bolg-bg/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-10">
+        {/*
+          Lockup "BØLG Corporativo" unificado en el header. Antes había wordmark
+          + divisor + texto "Corporativo" separados — daba sensación de
+          "subseccion". El lockup queda como marca propia coherente.
+          width/height respetan la proporción original (~2:1) para evitar CLS.
+        */}
         <Link href="/" aria-label="Volver al inicio" className="inline-flex items-center">
-          <Logo className="h-6 w-auto" />
-          <span className="ml-3 hidden border-l border-bolg-border pl-3 text-xs uppercase tracking-[0.18em] text-bolg-text/60 lg:inline">
-            Corporativo
-          </span>
+          <Image
+            src="/brand/bolg-corporativo-lockup.png"
+            alt="BØLG Corporativo"
+            width={1902}
+            height={936}
+            priority
+            className="h-10 w-auto sm:h-11"
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 lg:flex">

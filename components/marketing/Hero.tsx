@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 
@@ -6,8 +7,21 @@ export function Hero() {
     <section className="relative overflow-hidden border-b border-bolg-border bg-bolg-bg">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 sm:py-20 lg:grid-cols-12 lg:gap-16 lg:py-32 lg:px-10">
         <div className="lg:col-span-7">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-bolg-text/60 sm:text-xs">
-            BØLG Corporativo · Plataforma B2B
+          {/*
+            Lockup en lugar del eyebrow textual. Da identidad de marca evidente
+            desde el primer pantallazo. El microcopy "Plataforma B2B · Chile"
+            queda debajo en chiquito para no perder ese contexto.
+          */}
+          <Image
+            src="/brand/bolg-corporativo-lockup.png"
+            alt="BØLG Corporativo"
+            width={1902}
+            height={936}
+            priority
+            className="h-16 w-auto sm:h-20 lg:h-24"
+          />
+          <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-bolg-text/60 sm:mt-3 sm:text-xs">
+            Plataforma B2B · Chile
           </p>
           {/*
             Headline más compacto en mobile (text-3xl) para que los CTAs queden

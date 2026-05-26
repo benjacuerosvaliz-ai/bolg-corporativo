@@ -1,14 +1,21 @@
+import Image from "next/image";
 import Link from "next/link";
 import { bolgTokens } from "@/lib/brand/bolg-tokens";
 import { CONTACT, CONTACT_LINKS } from "@/lib/brand/contacts";
-import { Logo } from "./Logo";
 
 export function BrandFooter() {
   return (
     <footer className="mt-24 border-t border-bolg-border bg-bolg-bg">
       <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-4 lg:px-10">
         <div className="md:col-span-2">
-          <Logo layout="lockup" className="h-20 w-auto" />
+          {/* Lockup "BØLG Corporativo" — misma marca que el header pero más grande */}
+          <Image
+            src="/brand/bolg-corporativo-lockup.png"
+            alt="BØLG Corporativo"
+            width={1902}
+            height={936}
+            className="h-16 w-auto"
+          />
           <p className="mt-6 max-w-xs text-sm leading-relaxed text-bolg-text/70">
             Plataforma corporativa de BØLG. Cotiza productos personalizados con tu logo,
             con stock real, timelines y precios por volumen.

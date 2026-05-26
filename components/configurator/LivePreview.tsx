@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Stage, Layer, Image as KonvaImage, Transformer } from "react-konva";
 import type Konva from "konva";
 import type { PrintArea, ShopifyImage } from "@/lib/shopify/types";
 import { cn } from "@/lib/utils/cn";
 
 type Props = {
+  /** Imagen "preferida" para arrancar (definida por la zona seleccionada o la principal). */
   productImage: ShopifyImage;
+  /** Todas las imágenes del producto. El cliente puede cambiar cuál ve via thumbnails. */
+  allImages: ShopifyImage[];
   /** Zona "principal" para referencia de cm reales. Puede ser null. */
   area: PrintArea | null;
   logoUrl: string | null;
@@ -59,12 +62,37 @@ function initialLogoBox(logoImg: HTMLImageElement): LogoBox {
   };
 }
 
-export function LivePreview({ productImage, area, logoUrl }: Props) {
+export function LivePreview({ productImage, allImages, area, logoUrl }: Props) {
   const logoImg = useHtmlImage(logoUrl);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState<number>(CANVAS_SIZE);
 
-  // Observa el tamaño real del container para mantener el Stage responsive.
+  // Galería: dedupe por URL y cap a 6 thumbnails para no saturar.
+  // Algunos productos en Shopify tienen 8-10 imágenes (incluye lifestyle);
+  // el cliente solo necesita ver opciones de "cara" para personalizar.
+  const galleryImages = useMemo(() => {
+    const seen = new Set<string>();
+    const out: ShopifyImage[] = [];
+    for (const img of allImages) {
+      if (img.url && !seen.has(img.url)) {
+        seen.add(img.url);
+        out.push(img);
+      }
+      if (out.length >= 6) break;
+    }
+    return out;
+  }, [allImages]);
+
+  // Imagen actualmente seleccionada para mostrar en el canvas. Cambia cuando
+  // el cliente clickea un thumbnail o cuando cambia la zona en el configurador.
+  const [activeImageUrl, setActiveImageUrl] = useState<string>(productImage.url);
+
+  // Si la zona seleccionada cambia (lo que actualiza productImage), syncar.
+  useEffect(() => {
+    setActiveImageUrl(productImage.url);
+  }, [productImage.url]);
+
+  // ResizeObserver para hacer responsive el Stage interno.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -95,10 +123,8 @@ export function LivePreview({ productImage, area, logoUrl }: Props) {
     }
   }, [logoBox, logoImg]);
 
-  // Factor de escala entre coordenadas internas (CANVAS_SIZE) y CSS.
   const scale = containerSize / CANVAS_SIZE;
 
-  // Tamaño en cm reales (referencia visual, usando pxPerCm de la zona principal).
   const sizeCm =
     area && logoBox
       ? {
@@ -117,16 +143,14 @@ export function LivePreview({ productImage, area, logoUrl }: Props) {
         ref={containerRef}
         className="relative mx-auto aspect-square w-full overflow-hidden rounded-bolg-card bg-bolg-image-bg-light"
       >
-        {/* Imagen del producto como background HTML (responsive nativo) */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={productImage.url}
+          src={activeImageUrl}
           alt={productImage.altText ?? "Producto"}
           className="absolute inset-0 h-full w-full object-contain"
           draggable={false}
         />
 
-        {/* Stage Konva transparente encima, solo para el logo del cliente */}
         <Stage
           width={containerSize}
           height={containerSize}
@@ -202,6 +226,41 @@ export function LivePreview({ productImage, area, logoUrl }: Props) {
           </div>
         )}
       </div>
+
+      {/*
+        Galería de thumbnails: deja al cliente elegir cuál cara del producto
+        ve en el preview. Útil para llaveros / botellas / billeteras donde
+        el grabado va por una cara distinta de la imagen principal.
+      */}
+      {galleryImages.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {galleryImages.map((img) => {
+            const isActive = img.url === activeImageUrl;
+            return (
+              <button
+                key={img.url}
+                type="button"
+                onClick={() => setActiveImageUrl(img.url)}
+                className={cn(
+                  "relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-[3px] border-2 bg-bolg-image-bg-light transition",
+                  isActive
+                    ? "border-bolg-text"
+                    : "border-transparent hover:border-bolg-border",
+                )}
+                aria-label={`Ver ${img.altText ?? "cara del producto"}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={img.url}
+                  alt={img.altText ?? ""}
+                  className="h-full w-full object-contain"
+                  draggable={false}
+                />
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {logoBox && sizeCm && (
         <div

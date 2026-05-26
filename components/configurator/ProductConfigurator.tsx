@@ -115,6 +115,7 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
       <div className="lg:sticky lg:top-24 lg:self-start">
         <LivePreview
           productImage={previewImage}
+          allImages={product.images.length > 0 ? product.images : [product.featuredImage]}
           area={selectedArea}
           logoUrl={logoUrl}
         />

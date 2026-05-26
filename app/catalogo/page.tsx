@@ -8,7 +8,7 @@ import {
   type CatalogSearchParams,
 } from "@/components/catalog/CatalogFilters";
 import { CatalogFiltersMobile } from "@/components/catalog/CatalogFiltersMobile";
-import { Logo } from "@/components/brand/Logo";
+import Image from "next/image";
 
 // Catálogo siempre dinámico para reflejar stock real + cambios de metafields
 // sin caché agresiva.
@@ -43,19 +43,24 @@ export default async function CatalogoPage({
   return (
     <div className="mx-auto max-w-7xl px-6 py-6 sm:py-8 lg:px-10 lg:py-12">
       {/*
-        Header compacto: logo BØLG inline + kicker arriba, headline corto,
-        microcopy con counters. Pensado para no separar al usuario de la
-        grilla — el espacio vertical se reserva a los productos.
+        Header centrado: lockup BØLG Corporativo grande arriba como ancla
+        estética, kicker "Catálogo corporativo" + headline "Personaliza con
+        tu logo" abajo en chico. Counters compactos al cierre. Más editorial
+        que el header inline anterior.
       */}
-      <header className="border-b border-bolg-border pb-5 sm:pb-6">
-        <div className="flex items-center gap-3">
-          <Logo className="h-4 w-auto sm:h-5" />
-          <span aria-hidden className="text-bolg-text/30">·</span>
-          <p className="text-[10px] uppercase tracking-[0.25em] text-bolg-text/60 sm:text-xs">
-            Catálogo corporativo
-          </p>
-        </div>
-        <h1 className="mt-3 max-w-3xl text-xl font-light leading-[1.1] sm:mt-4 sm:text-2xl lg:text-3xl">
+      <header className="flex flex-col items-center border-b border-bolg-border pb-6 text-center sm:pb-8">
+        <Image
+          src="/brand/bolg-corporativo-lockup.png"
+          alt="BØLG Corporativo"
+          width={1902}
+          height={936}
+          priority
+          className="h-20 w-auto sm:h-24 lg:h-28"
+        />
+        <p className="mt-4 text-[10px] uppercase tracking-[0.25em] text-bolg-text/60 sm:mt-5 sm:text-xs">
+          Catálogo corporativo
+        </p>
+        <h1 className="mt-3 max-w-3xl text-lg font-light leading-[1.2] sm:text-xl lg:text-2xl">
           Personaliza con tu logo.
         </h1>
         <p className="mt-2 font-bolg-body text-xs normal-case tracking-normal text-bolg-text/70 sm:mt-3 sm:text-sm">

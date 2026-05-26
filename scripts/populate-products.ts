@@ -125,6 +125,50 @@ const PRINT_AREAS_BY_FAMILY: Record<
 };
 
 /**
+ * Override de print_areas para SKUs específicos donde el default por familia
+ * no aplica. Caso típico: Singapur y Vientian tienen 2 caras donde se puede
+ * grabar — frente (sobre logo BØLG) o reverso (cara plana).
+ *
+ * Cliente elige la zona en el PrintAreaSelector y eso queda registrado en
+ * la cotización (afecta producción).
+ */
+const PRINT_AREAS_OVERRIDE: Record<
+  string,
+  typeof PRINT_AREAS_BY_FAMILY[Family]
+> = {
+  // Billetera Singapur — 4 colores
+  A06I02: TWO_ZONES_BILLETERA(),
+  A06I01: TWO_ZONES_BILLETERA(),
+  A06I15: TWO_ZONES_BILLETERA(),
+  A06I16: TWO_ZONES_BILLETERA(),
+  // Billetera Vientian
+  A06AC02: TWO_ZONES_BILLETERA(),
+};
+
+function TWO_ZONES_BILLETERA() {
+  return [
+    {
+      id: "frente",
+      label: "Frente (sobre logo BØLG)",
+      imageUrl: "",
+      areaPolygon: [[0, 0], [0, 0], [0, 0], [0, 0]],
+      maxWidthCm: 6,
+      maxHeightCm: 3,
+      pxPerCm: 40,
+    },
+    {
+      id: "reverso",
+      label: "Reverso (cara plana)",
+      imageUrl: "",
+      areaPolygon: [[0, 0], [0, 0], [0, 0], [0, 0]],
+      maxWidthCm: 6,
+      maxHeightCm: 3,
+      pxPerCm: 40,
+    },
+  ];
+}
+
+/**
  * Técnicas con precio extra de personalización por unidad.
  * Láser lo hacemos in-house (sale más barato); el resto se externaliza.
  */
@@ -149,7 +193,7 @@ const TECHNIQUES_BY_KEY: Record<
     { id: "bordado", label: "Bordado", description: "Acabado premium en tela. Ideal para logos pequeños y medianos.", basePriceUnit: 4000, extraPositionPrice: 0, setupFee: 0, extraLeadDays: 10, availableAreaIds: ["frente", "lateral"] },
   ],
   laser: [
-    { id: "laser", label: "Grabado láser", description: "Acabado permanente y elegante. Lo hacemos in-house, sin externalizar.", basePriceUnit: 900, extraPositionPrice: 0, setupFee: 0, extraLeadDays: 5, availableAreaIds: ["frente", "lateral"] },
+    { id: "laser", label: "Grabado láser", description: "Acabado permanente y elegante. Lo hacemos in-house, sin externalizar.", basePriceUnit: 900, extraPositionPrice: 0, setupFee: 0, extraLeadDays: 5, availableAreaIds: ["frente", "lateral", "reverso"] },
   ],
   bordado: [
     { id: "bordado", label: "Bordado", description: "Acabado premium en tela.", basePriceUnit: 4000, extraPositionPrice: 0, setupFee: 0, extraLeadDays: 10, availableAreaIds: ["frente", "lateral"] },
@@ -191,7 +235,10 @@ const SET_METAFIELDS = /* GraphQL */ `
 async function processOne(token: string, p: ProductRow, productId: string) {
   await admin(token, ADD_TAG, { id: productId, tags: ["CORPORATIVO"] });
 
-  const printAreas = PRINT_AREAS_BY_FAMILY[p.family];
+  // Si el SKU tiene override (ej. Singapur/Vientian con 2 zonas), úsalo;
+  // sino default por familia (mochila = solo frente, botella = solo lateral, etc.).
+  const printAreas =
+    PRINT_AREAS_OVERRIDE[p.sku] ?? PRINT_AREAS_BY_FAMILY[p.family];
   const printTechniques = TECHNIQUES_BY_KEY[p.technique];
   const volumePricing = JSON.stringify(
     TRAMOS[p.family].map((minQty, i) => ({ minQty, unitPriceNet: p.breaks[i] })),

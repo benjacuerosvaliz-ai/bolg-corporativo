@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
@@ -16,7 +17,13 @@ const NAV_LINKS: NavLink[] = [
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+
+  // Para createPortal: en SSR document no existe. Esperamos a montar.
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Cerrar al cambiar de página.
   useEffect(() => {
@@ -44,44 +51,35 @@ export function MobileMenu() {
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  return (
-    <>
+  // Drawer renderizado en un portal a document.body. El `<header>` padre tiene
+  // backdrop-blur, lo cual en CSS crea un nuevo containing block para los
+  // descendants con position:fixed — eso hacía que `fixed inset-0` quedara
+  // recortado al área del header (64px) en vez de cubrir todo el viewport.
+  // El portal saca el drawer fuera de ese ancestor y restaura el comportamiento.
+  const drawer = (
+    <div
+      className={cn(
+        "fixed inset-0 z-[60] transition-opacity duration-200 md:hidden",
+        open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+      )}
+      aria-hidden={!open}
+    >
+      {/* Backdrop */}
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Abrir menú"
-        className="flex h-10 w-10 items-center justify-center rounded-bolg-button text-bolg-text transition hover:bg-bolg-image-bg-light md:hidden"
-      >
-        {/* Ícono hamburguesa minimal */}
-        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden>
-          <path d="M0 1h18M0 7h18M0 13h18" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-      </button>
+        onClick={() => setOpen(false)}
+        aria-label="Cerrar menú"
+        className="absolute inset-0 bg-bolg-text/40 backdrop-blur-sm"
+      />
 
-      {/* Backdrop + drawer */}
+      {/* Drawer desde la derecha. isolate crea stacking context propio
+          para que no se mezcle con backdrop-filter de capas inferiores. */}
       <div
         className={cn(
-          "fixed inset-0 z-[60] transition-opacity duration-200 md:hidden",
-          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+          "absolute right-0 top-0 isolate flex h-full w-[85%] max-w-sm flex-col bg-bolg-bg shadow-2xl transition-transform duration-300",
+          open ? "translate-x-0" : "translate-x-full",
         )}
-        aria-hidden={!open}
       >
-        {/* Backdrop */}
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          aria-label="Cerrar menú"
-          className="absolute inset-0 bg-bolg-text/40 backdrop-blur-sm"
-        />
-
-        {/* Drawer desde la derecha. isolate crea stacking context propio
-            para que no se mezcle con backdrop-filter de capas inferiores. */}
-        <div
-          className={cn(
-            "absolute right-0 top-0 isolate flex h-full w-[85%] max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300",
-            open ? "translate-x-0" : "translate-x-full",
-          )}
-        >
           <header className="flex items-center justify-between border-b border-bolg-border px-6 py-5">
             <span className="font-bolg-heading text-xs uppercase tracking-[0.25em] text-bolg-text/60">
               Menú
@@ -137,6 +135,22 @@ export function MobileMenu() {
           </div>
         </div>
       </div>
+  );
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Abrir menú"
+        className="flex h-10 w-10 items-center justify-center rounded-bolg-button text-bolg-text transition hover:bg-bolg-image-bg-light md:hidden"
+      >
+        {/* Ícono hamburguesa minimal */}
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden>
+          <path d="M0 1h18M0 7h18M0 13h18" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+      </button>
+      {mounted && createPortal(drawer, document.body)}
     </>
   );
 }

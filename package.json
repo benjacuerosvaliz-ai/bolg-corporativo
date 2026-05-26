@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "setup:shopify": "tsx scripts/setup-shopify-metafields.ts"
+    "setup:shopify": "tsx scripts/setup-shopify-metafields.ts",
+    "populate:products": "tsx scripts/populate-products.ts"
   },
   "dependencies": {
     "konva": "^10.3.0",

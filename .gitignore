@@ -34,6 +34,10 @@ yarn-error.log*
 .env*
 !.env.example
 
+# data sensible local (precios mayoristas + costos)
+*.local.ts
+*.local.json
+
 # vercel
 .vercel
 

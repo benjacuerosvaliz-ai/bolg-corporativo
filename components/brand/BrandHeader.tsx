@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
+import { MobileMenu } from "./MobileMenu";
 
 const NAV_LINKS = [
   { href: "/catalogo", label: "Catálogo" },
@@ -23,7 +24,7 @@ export function BrandHeader() {
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
-              href={link.href}
+              href={link.href as never}
               className="whitespace-nowrap text-xs uppercase tracking-[0.18em] text-bolg-text/80 transition hover:text-bolg-text"
             >
               {link.label}
@@ -31,13 +32,16 @@ export function BrandHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {/* Desktop CTA: "Ver catálogo" más explícito que "Cotizar ahora". */}
           <Link
-            href="/cotizador"
-            className="whitespace-nowrap rounded-bolg-button bg-bolg-button px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-bolg-button-text transition hover:opacity-90"
+            href="/catalogo"
+            className="hidden whitespace-nowrap rounded-bolg-button bg-bolg-button px-5 py-2.5 text-xs uppercase tracking-[0.18em] text-bolg-button-text transition hover:opacity-90 md:inline-flex"
           >
-            Cotizar ahora
+            Ver catálogo
           </Link>
+          {/* Mobile: hamburguesa abre drawer con nav + CTAs grandes. */}
+          <MobileMenu />
         </div>
       </div>
     </header>

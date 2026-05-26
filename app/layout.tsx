@@ -32,6 +32,24 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env["NEXT_PUBLIC_SITE_URL"] ?? "https://corporativo.bolg.cl",
   ),
+  // OpenGraph + Twitter cards para previews al compartir el link (WhatsApp,
+  // LinkedIn, Twitter, etc.). La imagen la sirve automáticamente Next.js
+  // desde app/opengraph-image.png y app/twitter-image.png — sólo necesitamos
+  // los campos textuales para que el copy del preview sea correcto.
+  openGraph: {
+    type: "website",
+    locale: "es_CL",
+    siteName: "BØLG Corporativo",
+    title: "BØLG Corporativo — Regalos corporativos personalizados",
+    description:
+      "Mochilas, botellas y accesorios BØLG personalizados con tu logo. Precios por volumen, stock real y preview de cómo se ve antes de aprobar.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BØLG Corporativo — Regalos corporativos personalizados",
+    description:
+      "Mochilas, botellas y accesorios BØLG personalizados con tu logo. Precios por volumen, stock real y preview de cómo se ve antes de aprobar.",
+  },
 };
 
 export default function RootLayout({

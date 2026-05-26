@@ -8,6 +8,7 @@ import {
   type CatalogSearchParams,
 } from "@/components/catalog/CatalogFilters";
 import { CatalogFiltersMobile } from "@/components/catalog/CatalogFiltersMobile";
+import { Logo } from "@/components/brand/Logo";
 
 // Catálogo siempre dinámico para reflejar stock real + cambios de metafields
 // sin caché agresiva.
@@ -40,18 +41,27 @@ export default async function CatalogoPage({
   const filtered = applyFilters(all, active, stockByProductId);
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8 sm:py-12 lg:px-10 lg:py-24">
-      <header className="border-b border-bolg-border pb-6 sm:pb-10">
-        <p className="text-[10px] uppercase tracking-[0.25em] text-bolg-text/60 sm:text-xs">
-          Catálogo corporativo
-        </p>
-        <h1 className="mt-3 max-w-3xl text-2xl font-light leading-[1.1] sm:mt-4 sm:text-3xl lg:text-5xl">
-          Productos elegibles para cotización con tu logo.
+    <div className="mx-auto max-w-7xl px-6 py-6 sm:py-8 lg:px-10 lg:py-12">
+      {/*
+        Header compacto: logo BØLG inline + kicker arriba, headline corto,
+        microcopy con counters. Pensado para no separar al usuario de la
+        grilla — el espacio vertical se reserva a los productos.
+      */}
+      <header className="border-b border-bolg-border pb-5 sm:pb-6">
+        <div className="flex items-center gap-3">
+          <Logo className="h-4 w-auto sm:h-5" />
+          <span aria-hidden className="text-bolg-text/30">·</span>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-bolg-text/60 sm:text-xs">
+            Catálogo corporativo
+          </p>
+        </div>
+        <h1 className="mt-3 max-w-3xl text-xl font-light leading-[1.1] sm:mt-4 sm:text-2xl lg:text-3xl">
+          Personaliza con tu logo.
         </h1>
-        <p className="mt-3 max-w-2xl font-bolg-body text-sm normal-case tracking-normal text-bolg-text/70 sm:mt-4 sm:text-base">
+        <p className="mt-2 font-bolg-body text-xs normal-case tracking-normal text-bolg-text/70 sm:mt-3 sm:text-sm">
           {filtered.length} {filtered.length === 1 ? "producto" : "productos"}
-          {filtered.length !== all.length ? ` de ${all.length} totales` : ""}.
-          Click en cualquiera para configurar técnica, cantidad y zona de impresión.
+          {filtered.length !== all.length ? ` de ${all.length} totales` : ""}
+          {" · "}Mínimo 10 unidades{" · "}Despacho a todo Chile
         </p>
       </header>
 

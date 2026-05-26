@@ -25,17 +25,37 @@ export type InventoryLevel = {
 /** % del stock reservado para retail. Configurable a futuro vía metafield. */
 const RETAIL_RESERVE_RATIO = 0.1;
 
+/**
+ * Suma "available" de todas las ubicaciones activas. Hoy en BØLG son 2:
+ * "Bodega KW" y "Tienda BOLG Renato Sanchez". Si en el futuro hay que excluir
+ * alguna (ej. tiendas físicas no comprometibles a corporativo), agregamos
+ * un filtro acá sin tocar el resto del código.
+ */
 const INVENTORY_QUERY = /* GraphQL */ `
   query VariantInventory($id: ID!) {
     productVariant(id: $id) {
       id
-      inventoryQuantity
       inventoryItem {
         tracked
+        inventoryLevels(first: 20) {
+          edges {
+            node {
+              location { id name }
+              quantities(names: ["available"]) { name quantity }
+            }
+          }
+        }
       }
     }
   }
 `;
+
+type InventoryLevelEdge = {
+  node: {
+    location: { id: string; name: string };
+    quantities: { name: string; quantity: number }[];
+  };
+};
 
 export async function adminFetch<T>(
   query: string,
@@ -90,14 +110,24 @@ export async function getInventoryLevel(
   assertAdminEnv();
 
   const data = await adminFetch<{
-    productVariant: { id: string; inventoryQuantity: number | null } | null;
+    productVariant: {
+      id: string;
+      inventoryItem: {
+        inventoryLevels: { edges: InventoryLevelEdge[] };
+      } | null;
+    } | null;
   }>(INVENTORY_QUERY, { id: variantId });
 
-  const available = data.productVariant?.inventoryQuantity ?? 0;
-  const reservedForRetail = Math.floor(Math.max(0, available) * RETAIL_RESERVE_RATIO);
+  const edges = data.productVariant?.inventoryItem?.inventoryLevels.edges ?? [];
+  // Suma del available de TODAS las ubicaciones activas.
+  const available = edges.reduce((sum, e) => {
+    const qty = e.node.quantities.find((q) => q.name === "available")?.quantity ?? 0;
+    return sum + Math.max(0, qty);
+  }, 0);
+  const reservedForRetail = Math.floor(available * RETAIL_RESERVE_RATIO);
   return {
     variantId,
-    available: Math.max(0, available),
+    available,
     reservedForRetail,
     availableForCorporate: Math.max(0, available - reservedForRetail),
   };

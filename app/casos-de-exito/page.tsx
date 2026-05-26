@@ -93,15 +93,15 @@ export default function CasosDeExitoPage() {
 
           {/*
             Grilla "logo wall" estilo galería: sólo los logos, sin captions.
-            Decisión de Benja: cuando el logo es reconocible (Bayer, Monsanto,
-            etc.), el nombre/industria al pie sólo agrega ruido. La sexta celda
-            queda como CTA tipográfico para representar las micro empresas.
+            Sin fondo ni bordes — los logos flotan directo sobre el fondo de
+            la página. Más editorial, menos "tabla". Gap generoso para que
+            cada logo respire en su propio espacio.
           */}
-          <div className="mt-12 grid gap-px overflow-hidden border border-bolg-border bg-bolg-border sm:grid-cols-2 lg:grid-cols-3 lg:mt-16">
+          <div className="mt-12 grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:mt-16 lg:gap-14">
             {CLIENTS.map((c) => (
               <article
                 key={c.name}
-                className="relative flex h-40 items-center justify-center bg-bolg-image-bg-light p-8 lg:h-48 lg:p-12"
+                className="relative flex h-32 items-center justify-center p-4 sm:h-36 lg:h-40"
               >
                 {c.logoSlug ? (
                   <Image
@@ -109,7 +109,7 @@ export default function CasosDeExitoPage() {
                     alt={`Logo ${c.name}`}
                     fill
                     sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
-                    className="object-contain p-6 lg:p-10"
+                    className="object-contain"
                   />
                 ) : (
                   <p className="font-bolg-heading text-xl uppercase tracking-[0.1em] text-bolg-text sm:text-2xl">

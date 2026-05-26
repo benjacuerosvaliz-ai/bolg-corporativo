@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -18,13 +19,40 @@ export const metadata: Metadata = {
  * "Casos en detalle" abajo.
  */
 
-const CLIENTS = [
-  { name: "Bayer", industry: "Farmacéutica multinacional" },
-  { name: "Astara", industry: "Automotriz" },
-  { name: "Monsanto", industry: "Agroindustria" },
-  { name: "Viña Ventisquero", industry: "Vinos" },
-  { name: "Check Fast Cherry", industry: "Exportación frutícola" },
-] as const;
+type Client = {
+  name: string;
+  industry: string;
+  /** Slug + extensión del logo en /public/clients/. Si null, fallback a wordmark tipográfico. */
+  logo: { slug: string; ext: "png" | "jpg" | "webp" } | null;
+};
+
+const CLIENTS: readonly Client[] = [
+  {
+    name: "Bayer",
+    industry: "Farmacéutica multinacional",
+    logo: { slug: "bayer", ext: "png" },
+  },
+  {
+    name: "Astara",
+    industry: "Automotriz",
+    logo: { slug: "astara", ext: "jpg" },
+  },
+  {
+    name: "Monsanto",
+    industry: "Agroindustria",
+    logo: { slug: "monsanto", ext: "png" },
+  },
+  {
+    name: "Viña Ventisquero",
+    industry: "Vinos",
+    logo: { slug: "ventisquero", ext: "webp" },
+  },
+  {
+    name: "Check Fast Cherry",
+    industry: "Exportación frutícola",
+    logo: { slug: "check-fast-cherry", ext: "png" },
+  },
+];
 
 const VALUE_PROPS = [
   {
@@ -70,17 +98,38 @@ export default function CasosDeExitoPage() {
             {CLIENTS.map((c) => (
               <article
                 key={c.name}
-                className="flex h-40 flex-col justify-end bg-bolg-image-bg-light p-6 lg:p-8"
+                className="flex h-48 flex-col bg-bolg-image-bg-light lg:h-56"
               >
-                <p className="font-bolg-heading text-xl uppercase tracking-[0.1em] text-bolg-text sm:text-2xl">
-                  {c.name}
-                </p>
-                <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-bolg-text/50">
-                  {c.industry}
-                </p>
+                {/* Logo arriba: contenedor con altura fija + object-contain para
+                    que respete proporción. mix-blend-multiply quita el fondo
+                    blanco visualmente cuando el JPG/PNG no es transparente. */}
+                <div className="relative flex-1 p-6 lg:p-8">
+                  {c.logo ? (
+                    <Image
+                      src={`/clients/${c.logo.slug}.${c.logo.ext}`}
+                      alt={`Logo ${c.name}`}
+                      fill
+                      sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+                      className="object-contain p-4 mix-blend-multiply"
+                    />
+                  ) : (
+                    <p className="font-bolg-heading text-xl uppercase tracking-[0.1em] text-bolg-text sm:text-2xl">
+                      {c.name}
+                    </p>
+                  )}
+                </div>
+                {/* Footer textual con nombre + industria */}
+                <div className="border-t border-bolg-border/60 bg-bolg-bg/50 px-6 py-3 lg:px-8">
+                  <p className="font-bolg-body text-sm tracking-normal text-bolg-text">
+                    {c.name}
+                  </p>
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-bolg-text/50">
+                    {c.industry}
+                  </p>
+                </div>
               </article>
             ))}
-            <article className="flex h-40 flex-col justify-end bg-bolg-text p-6 text-bolg-button-text lg:p-8">
+            <article className="flex h-48 flex-col justify-end bg-bolg-text p-6 text-bolg-button-text lg:h-56 lg:p-8">
               <p className="font-bolg-heading text-xl uppercase tracking-[0.1em] sm:text-2xl">
                 + micro empresas
               </p>

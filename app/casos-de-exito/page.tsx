@@ -48,38 +48,29 @@ const VALUE_PROPS = [
 export default function CasosDeExitoPage() {
   return (
     <>
-      {/* Header */}
+      {/*
+        Sección única: header + lista de cuentas. Antes había dos sections
+        consecutivas (hero blanco + grilla gris) diciendo lo mismo dos veces.
+        Consolidado para ir directo a la prueba social que vale: los logos.
+      */}
       <section className="border-b border-bolg-border bg-bolg-bg">
-        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-28">
+        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10 lg:py-24">
           <p className="text-[10px] uppercase tracking-[0.25em] text-bolg-text/60 sm:text-xs">
-            Casos de éxito
+            Casos de éxito · Selección de cuentas
           </p>
-          <h1 className="mt-4 max-w-4xl text-3xl font-light leading-[1.05] sm:mt-6 sm:text-5xl lg:text-6xl">
-            Empresas que confían en BØLG.
+          <h1 className="mt-4 max-w-4xl text-3xl font-light leading-[1.05] sm:mt-6 sm:text-4xl lg:text-5xl">
+            Marcas que ya confiaron en BØLG sus regalos corporativos.
           </h1>
           <p className="mt-6 max-w-2xl font-bolg-body text-base normal-case tracking-normal text-bolg-text/75 sm:mt-8 sm:text-lg">
             Desde multinacionales con miles de colaboradores hasta PyMEs que
-            quieren regalar bien sin perder el toque, marcas que toman en serio
-            sus regalos corporativos eligen BØLG.
+            quieren regalar bien sin perder el toque.
           </p>
-        </div>
-      </section>
 
-      {/* Lista de clientes */}
-      <section className="border-b border-bolg-border bg-bolg-image-bg-light">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-24">
-          <p className="text-xs uppercase tracking-[0.25em] text-bolg-text/60">
-            Selección de cuentas
-          </p>
-          <h2 className="mt-4 max-w-3xl text-2xl font-light leading-[1.1] sm:text-3xl lg:text-4xl">
-            Marcas que ya nos confiaron sus regalos corporativos.
-          </h2>
-
-          <div className="mt-12 grid gap-px overflow-hidden border border-bolg-border bg-bolg-border sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid gap-px overflow-hidden border border-bolg-border bg-bolg-border sm:grid-cols-2 lg:grid-cols-3 lg:mt-16">
             {CLIENTS.map((c) => (
               <article
                 key={c.name}
-                className="flex h-40 flex-col justify-end bg-bolg-bg p-6 lg:p-8"
+                className="flex h-40 flex-col justify-end bg-bolg-image-bg-light p-6 lg:p-8"
               >
                 <p className="font-bolg-heading text-xl uppercase tracking-[0.1em] text-bolg-text sm:text-2xl">
                   {c.name}
@@ -98,12 +89,6 @@ export default function CasosDeExitoPage() {
               </p>
             </article>
           </div>
-
-          <p className="mt-8 max-w-2xl font-bolg-body text-xs normal-case tracking-normal text-bolg-text/50 sm:text-sm">
-            Trabajamos con organizaciones de todos los tamaños: desde
-            multinacionales con miles de colaboradores hasta startups
-            chilenas que quieren un detalle bien hecho para su equipo.
-          </p>
         </div>
       </section>
 

@@ -8,7 +8,7 @@ import { VariantSelector } from "./VariantSelector";
 import { PrintAreaSelector } from "./PrintAreaSelector";
 import { PrintTechniqueSelector } from "./PrintTechniqueSelector";
 import { QuantityStepper } from "./QuantityStepper";
-import { TimelineSelector } from "./TimelineSelector";
+import { DateSelector, OccasionSelector } from "./TimelineSelector";
 import { PricingPanel } from "./PricingPanel";
 import { StockAnalysis } from "./StockAnalysis";
 import { LogoUploader } from "./LogoUploader";
@@ -147,6 +147,11 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
           />
         )}
 
+        {/* Orden del flujo (decidido con Benja):
+            técnica → fecha → cantidad → cotizador en vivo → contexto.
+            La fecha va antes que la cantidad para que el StockAnalysis se
+            calcule con escenario realista desde el primer ajuste de cantidad. */}
+
         {activeTechnique && (
           <PrintTechniqueSelector
             techniques={product.printTechniques}
@@ -156,18 +161,13 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
           />
         )}
 
+        <DateSelector value={requiredDate} onChange={setRequiredDate} />
+
         <QuantityStepper
           value={quantity}
           minQty={product.minQty}
           onChange={setQuantity}
           nextBreak={pricing?.nextBreak ?? null}
-        />
-
-        <TimelineSelector
-          value={requiredDate}
-          onChange={setRequiredDate}
-          occasion={occasion}
-          onOccasionChange={setOccasion}
         />
 
         {pricing && (
@@ -185,6 +185,11 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
             requiredDate={new Date(requiredDate)}
           />
         )}
+
+        {/* Contexto al final: es nice-to-have para el equipo comercial,
+            no afecta pricing ni stock, así no rompe el momentum del usuario
+            que ya vio el precio y quiere agregar al carrito. */}
+        <OccasionSelector value={occasion} onChange={setOccasion} />
 
         <AddToQuoteButton
           product={product}

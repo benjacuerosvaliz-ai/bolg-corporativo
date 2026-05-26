@@ -64,6 +64,16 @@ export function calculateLinePricing(input: PricingInput): LinePricing {
 
   const savingsVsBaseline =
     quantity * Math.max(0, baselineBreak.unitPriceNet - unitPriceNet);
+  const savingsVsBaselineGross = savingsVsBaseline * (1 + IVA_RATE);
+
+  const nextSavingsNet = nextBreak
+    ? savingsAtNextBreak({
+        currentBreak: appliedBreak,
+        nextBreak,
+        customizationUnitPrice,
+        setupFee,
+      })
+    : 0;
 
   return {
     unitPriceNet,
@@ -80,15 +90,12 @@ export function calculateLinePricing(input: PricingInput): LinePricing {
       ? {
           minQty: nextBreak.minQty,
           unitPriceNet: nextBreak.unitPriceNet,
-          savings: savingsAtNextBreak({
-            currentBreak: appliedBreak,
-            nextBreak,
-            customizationUnitPrice,
-            setupFee,
-          }),
+          savings: nextSavingsNet,
+          savingsGross: nextSavingsNet * (1 + IVA_RATE),
         }
       : null,
     savingsVsBaseline,
+    savingsVsBaselineGross,
   };
 }
 

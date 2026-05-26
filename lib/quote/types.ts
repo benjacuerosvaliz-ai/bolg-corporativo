@@ -43,10 +43,20 @@ export type LinePricing = {
   totalGross: number;
   /** Volume break aplicado en este cálculo. */
   appliedBreak: { minQty: number; unitPriceNet: number };
-  /** Próximo break si existe (para mostrar "sube a X y ahorra Y"). */
-  nextBreak: { minQty: number; unitPriceNet: number; savings: number } | null;
-  /** Cuánto se ahorra vs el primer break (sin descuento por volumen). */
+  /**
+   * Próximo break si existe (para mostrar "sube a X y ahorra Y").
+   * `savings` y `savingsGross` están en CLP neto y bruto (con IVA 19%).
+   */
+  nextBreak: {
+    minQty: number;
+    unitPriceNet: number;
+    savings: number;
+    savingsGross: number;
+  } | null;
+  /** Cuánto se ahorra vs el primer break, en neto. */
   savingsVsBaseline: number;
+  /** Mismo ahorro pero con IVA 19% — lo que se muestra al usuario por default. */
+  savingsVsBaselineGross: number;
 };
 
 export type QuoteCustomer = {

@@ -117,8 +117,10 @@ describe("calculateLinePricing", () => {
       expect(r.nextBreak).not.toBeNull();
       expect(r.nextBreak?.minQty).toBe(100);
       expect(r.nextBreak?.unitPriceNet).toBe(9000);
-      // Subiendo a 100u con el break 9000 vs 10000: ahorro = 100 * 1000 = 100.000
+      // Subiendo a 100u con el break 9000 vs 10000: ahorro neto = 100 * 1000 = 100.000
       expect(r.nextBreak?.savings).toBe(100_000);
+      // ahorro bruto = 100.000 × 1.19 = 119.000
+      expect(r.nextBreak?.savingsGross).toBeCloseTo(119_000, 0);
     });
   });
 
@@ -197,7 +199,7 @@ describe("calculateLinePricing", () => {
   });
 
   describe("savingsVsBaseline", () => {
-    it("es 0 al estar en el primer break", () => {
+    it("es 0 al estar en el primer break (neto y bruto)", () => {
       const r = calculateLinePricing({
         product: makeProduct(),
         quantity: 50,
@@ -205,17 +207,20 @@ describe("calculateLinePricing", () => {
         printPositions: 1,
       });
       expect(r.savingsVsBaseline).toBe(0);
+      expect(r.savingsVsBaselineGross).toBe(0);
     });
 
-    it("es positivo al estar en un break superior", () => {
+    it("es positivo al estar en un break superior (neto y bruto)", () => {
       const r = calculateLinePricing({
         product: makeProduct(),
         quantity: 250,
         technique: TECH_DTF,
         printPositions: 1,
       });
-      // baseline 10000 vs aplicado 7500. ahorro: 250 * 2500 = 625.000
+      // baseline 10000 vs aplicado 7500. ahorro neto: 250 * 2500 = 625.000
       expect(r.savingsVsBaseline).toBe(625_000);
+      // ahorro bruto = neto × 1.19 = 743.750
+      expect(r.savingsVsBaselineGross).toBeCloseTo(743_750, 0);
     });
   });
 

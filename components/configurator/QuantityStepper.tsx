@@ -8,16 +8,21 @@ type Props = {
   value: number;
   minQty: number;
   onChange: (q: number) => void;
-  /** Próximo break sugerido por el engine de pricing. */
-  nextBreak: { minQty: number; savings: number } | null;
+  /**
+   * Próximo break sugerido por el engine. `savingsGross` es el ahorro con IVA
+   * (lo mostramos para consistencia con el "Total bruto" del cotizador).
+   */
+  nextBreak: { minQty: number; savingsGross: number } | null;
 };
 
 export function QuantityStepper({ value, minQty, onChange, nextBreak }: Props) {
   const id = useId();
   const isBelowMin = value < minQty;
 
-  const dec = () => onChange(Math.max(1, value - 10));
-  const inc = () => onChange(value + 10);
+  // Click suelto = ±1 unidad. Para saltos grandes el usuario tipea en el input,
+  // o usa el botón del "próximo break" abajo que salta al siguiente tramo.
+  const dec = () => onChange(Math.max(1, value - 1));
+  const inc = () => onChange(value + 1);
 
   return (
     <div>
@@ -37,7 +42,7 @@ export function QuantityStepper({ value, minQty, onChange, nextBreak }: Props) {
         <button
           type="button"
           onClick={dec}
-          aria-label="Restar 10"
+          aria-label="Restar 1"
           className="flex h-12 w-12 items-center justify-center rounded-bolg-button border border-bolg-border text-2xl font-light text-bolg-text transition hover:border-bolg-text"
         >
           −
@@ -60,7 +65,7 @@ export function QuantityStepper({ value, minQty, onChange, nextBreak }: Props) {
         <button
           type="button"
           onClick={inc}
-          aria-label="Sumar 10"
+          aria-label="Sumar 1"
           className="flex h-12 w-12 items-center justify-center rounded-bolg-button border border-bolg-border text-2xl font-light text-bolg-text transition hover:border-bolg-text"
         >
           +
@@ -73,7 +78,7 @@ export function QuantityStepper({ value, minQty, onChange, nextBreak }: Props) {
         </p>
       )}
 
-      {nextBreak && nextBreak.savings > 0 && (
+      {nextBreak && nextBreak.savingsGross > 0 && (
         <button
           type="button"
           onClick={() => onChange(nextBreak.minQty)}
@@ -83,7 +88,7 @@ export function QuantityStepper({ value, minQty, onChange, nextBreak }: Props) {
             Sube a {nextBreak.minQty} unidades
           </span>
           <span className="font-bolg-body text-xs tracking-normal">
-            ahorras {formatCLP(nextBreak.savings)}
+            ahorras {formatCLP(nextBreak.savingsGross)}
           </span>
         </button>
       )}

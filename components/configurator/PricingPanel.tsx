@@ -50,14 +50,14 @@ export function PricingPanel({
         </p>
       </header>
 
-      {pricing.savingsVsBaseline > 0 && (
+      {pricing.savingsVsBaselineGross > 0 && (
         <div className="mt-5 inline-flex items-center gap-2 rounded-bolg-button bg-bolg-text px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-bolg-button-text">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden />
-          Ahorras {formatCLP(pricing.savingsVsBaseline)} vs precio base
+          Ahorras {formatCLP(pricing.savingsVsBaselineGross)} vs precio base
         </div>
       )}
 
-      {pricing.nextBreak && pricing.nextBreak.savings > 0 && (
+      {pricing.nextBreak && pricing.nextBreak.savingsGross > 0 && (
         <button
           type="button"
           onClick={() => onJumpToQuantity?.(pricing.nextBreak!.minQty)}
@@ -72,7 +72,7 @@ export function PricingPanel({
             </span>
           </span>
           <span className="font-bolg-body text-sm tracking-normal">
-            ahorras {formatCLP(pricing.nextBreak.savings)}
+            ahorras {formatCLP(pricing.nextBreak.savingsGross)}
           </span>
         </button>
       )}

@@ -49,33 +49,53 @@ export function Hero() {
         </div>
 
         {/*
-          TODO Benja: foto hero real (mochila BØLG con logo corporativo en
-          contexto premium). Mientras tanto mosaico tipográfico de las 3
-          categorías para comunicar la oferta de un vistazo.
+          Mosaico de categorías clickeables. Cada bloque lleva a /catalogo
+          filtrado por su categoría — funciona como navegación visual para
+          que el usuario pueda saltar directo desde el Hero a la categoría
+          que le interesa. El último bloque ("Tu logo aquí") es CTA al
+          catálogo completo, reforzando el concepto de personalización.
+          TODO Benja: cuando haya fotos reales de cada categoría con logo
+          aplicado, reemplazar el fondo plano por <Image fill> de cada una.
         */}
         <div className="hidden lg:col-span-5 lg:block">
           <div className="grid h-full grid-cols-2 grid-rows-3 gap-2">
-            <div className="col-span-2 flex items-end bg-bolg-image-bg-dark p-6 text-bolg-button-text">
-              <p className="text-xs uppercase tracking-[0.25em] opacity-80">
+            <Link
+              href="/catalogo?category=Mochilas+y+Bolsos"
+              className="group col-span-2 flex items-end bg-bolg-image-bg-dark p-6 text-bolg-button-text transition hover:bg-bolg-text"
+            >
+              <p className="text-xs uppercase tracking-[0.25em] opacity-80 transition group-hover:opacity-100">
                 Mochilas y bolsos
+                <span aria-hidden className="ml-2 inline-block transition group-hover:translate-x-1">→</span>
               </p>
-            </div>
-            <div className="flex items-end bg-bolg-image-bg-light p-6">
-              <p className="text-xs uppercase tracking-[0.25em] text-bolg-text/70">
+            </Link>
+            <Link
+              href="/catalogo?category=Botellas"
+              className="group flex items-end bg-bolg-image-bg-light p-6 transition hover:bg-bolg-image-bg-dark hover:text-bolg-button-text"
+            >
+              <p className="text-xs uppercase tracking-[0.25em] text-bolg-text/70 transition group-hover:text-bolg-button-text">
                 Botellas
+                <span aria-hidden className="ml-2 inline-block transition group-hover:translate-x-1">→</span>
               </p>
-            </div>
-            <div className="flex items-end bg-bolg-image-bg-dark p-6 text-bolg-button-text">
-              <p className="text-xs uppercase tracking-[0.25em] opacity-80">
+            </Link>
+            <Link
+              href="/catalogo?category=Accesorios"
+              className="group flex items-end bg-bolg-image-bg-dark p-6 text-bolg-button-text transition hover:bg-bolg-text"
+            >
+              <p className="text-xs uppercase tracking-[0.25em] opacity-80 transition group-hover:opacity-100">
                 Accesorios
+                <span aria-hidden className="ml-2 inline-block transition group-hover:translate-x-1">→</span>
               </p>
-            </div>
-            <div className="col-span-2 flex items-end justify-between bg-bolg-text p-6 text-bolg-button-text">
-              <p className="text-xs uppercase tracking-[0.25em] opacity-80">
+            </Link>
+            <Link
+              href="/catalogo"
+              className="group col-span-2 flex items-end justify-between bg-bolg-text p-6 text-bolg-button-text transition hover:opacity-90"
+            >
+              <p className="text-xs uppercase tracking-[0.25em] opacity-80 transition group-hover:opacity-100">
                 Tu logo aquí
+                <span aria-hidden className="ml-2 inline-block transition group-hover:translate-x-1">→</span>
               </p>
               <Logo variant="inverted" className="h-5 w-auto opacity-80" />
-            </div>
+            </Link>
           </div>
         </div>
       </div>

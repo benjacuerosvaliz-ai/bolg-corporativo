@@ -1,15 +1,12 @@
 /**
- * Métricas de track record.
- *
- * TODO Benja: confirmar números reales (unidades entregadas, empresas,
- * tasa de recompra, antigüedad). Por ahora son "—" para no inventar.
- * Cuando tengas los números los reemplazas en METRICS.
+ * Métricas de track record. Cifras confirmadas con Benja 2026-05-26.
+ * Usamos "+" para sugerir crecimiento sin comprometer el número exacto.
  */
 const METRICS = [
-  { value: "—", label: "Unidades entregadas" },
-  { value: "—", label: "Empresas atendidas" },
-  { value: "—", label: "Tasa de recompra" },
-  { value: "—", label: "Años en el mercado" },
+  { value: "+1.000", label: "Unidades entregadas" },
+  { value: "+30", label: "Empresas atendidas" },
+  { value: "30%", label: "Tasa de recompra" },
+  { value: "+3", label: "Años en el mercado" },
 ] as const;
 
 export function SuccessMetrics() {

@@ -32,7 +32,8 @@ export function CatalogFiltersMobile({
     (active.category ? 1 : 0) +
     (active.technique ? 1 : 0) +
     (active.inStock ? 1 : 0) +
-    (active.sort && active.sort !== "relevance" ? 1 : 0);
+    // price_desc es el default → no cuenta como filtro activo. Sólo price_asc.
+    (active.sort === "price_asc" ? 1 : 0);
 
   return (
     <div className="lg:hidden">

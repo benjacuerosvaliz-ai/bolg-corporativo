@@ -6,7 +6,9 @@ export type CatalogSearchParams = {
   category?: string;
   technique?: string;
   inStock?: string;
-  sort?: "relevance" | "price_asc" | "price_desc";
+  // Default visual = "Precio: mayor a menor". Aceptamos también "price_desc"
+  // explícito o URLs legacy con "relevance" → se interpretan como default.
+  sort?: "price_asc" | "price_desc";
 };
 
 type Props = {
@@ -69,9 +71,10 @@ export function CatalogFilters({ products, active }: Props) {
       <FilterGroup
         label="Ordenar por"
         items={[
-          { label: "Relevancia", value: undefined, active: !active.sort || active.sort === "relevance" },
+          // Default: mayor a menor precio para que mochilas y bolsos (productos
+          // ancla, más caros) abran el catálogo. Decisión de merchandising.
+          { label: "Precio: mayor a menor", value: undefined, active: !active.sort || active.sort === "price_desc" },
           { label: "Precio: menor a mayor", value: "price_asc", active: active.sort === "price_asc" },
-          { label: "Precio: mayor a menor", value: "price_desc", active: active.sort === "price_desc" },
         ]}
         paramKey="sort"
         current={active}
@@ -129,7 +132,9 @@ function buildQuery(p: CatalogSearchParams): string {
   if (p.category) sp.set("category", p.category);
   if (p.technique) sp.set("technique", p.technique);
   if (p.inStock) sp.set("inStock", p.inStock);
-  if (p.sort && p.sort !== "relevance") sp.set("sort", p.sort);
+  // Sólo price_asc se persiste en URL: el default (price_desc) queda implícito
+  // como "no sort" para que la URL canónica sea más limpia.
+  if (p.sort === "price_asc") sp.set("sort", p.sort);
   return sp.toString();
 }
 
@@ -154,9 +159,11 @@ export function applyFilters(
       (x) => (stockByProductId[x.id] ?? 0) > STOCK_READY_THRESHOLD,
     );
   }
+  // Default: mayor a menor precio (mochilas y bolsos al inicio).
+  // Si el usuario explícitamente elige price_asc, respetamos eso.
   if (p.sort === "price_asc") {
     out.sort((a, b) => firstPrice(a) - firstPrice(b));
-  } else if (p.sort === "price_desc") {
+  } else {
     out.sort((a, b) => firstPrice(b) - firstPrice(a));
   }
   return out;

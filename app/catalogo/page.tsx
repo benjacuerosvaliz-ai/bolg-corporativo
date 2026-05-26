@@ -86,14 +86,13 @@ function normalize(
     if (Array.isArray(v)) return v[0];
     return v;
   };
+  // Default visual = price_desc. URLs viejas con sort=relevance o sort=price_desc
+  // se descartan a undefined (mismo efecto). Sólo price_asc se preserva.
   const sort = get("sort");
   return {
     category: get("category"),
     technique: get("technique"),
     inStock: get("inStock"),
-    sort:
-      sort === "price_asc" || sort === "price_desc" || sort === "relevance"
-        ? sort
-        : undefined,
+    sort: sort === "price_asc" ? "price_asc" : undefined,
   };
 }

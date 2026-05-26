@@ -1,5 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
+import {
+  ConfigureIcon,
+  QuoteIcon,
+  ApproveIcon,
+  DeliveryIcon,
+  BoltIcon,
+  CalendarIcon,
+  StackIcon,
+  SplitIcon,
+  ReceiptIcon,
+  HourglassIcon,
+} from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "Cómo funciona",
@@ -42,6 +55,7 @@ export default function ComoFuncionaPage() {
           <Step
             number="01"
             title="Configurar"
+            icon={<ConfigureIcon className="h-7 w-7 text-bolg-text" />}
             body="Explora los 49 productos del catálogo. En cada ficha eliges técnica de impresión (serigrafía, bordado, DTF, grabado láser), cantidad y zona de aplicación del logo. Subes tu archivo y ves un preview real con tu logo aplicado antes de cotizar. El precio por volumen baja a medida que subes la cantidad."
             highlights={[
               "Mínimo 10 unidades por producto",
@@ -52,6 +66,7 @@ export default function ComoFuncionaPage() {
           <Step
             number="02"
             title="Cotizar"
+            icon={<QuoteIcon className="h-7 w-7 text-bolg-text" />}
             body="Agregas líneas a tu cotización (puedes mezclar productos: por ejemplo 50 mochilas + 100 botellas). Cuando estés listo, completas los datos de tu empresa y enviamos un PDF formal con el detalle a tu correo, listo para que tu equipo de finanzas lo revise."
             highlights={[
               "PDF formal por email al instante",
@@ -62,6 +77,7 @@ export default function ComoFuncionaPage() {
           <Step
             number="03"
             title="Aprobar mockup"
+            icon={<ApproveIcon className="h-7 w-7 text-bolg-text" />}
             body="Nuestro equipo te responde el mismo día hábil. Confirmamos stock real por talla y color, lead time exacto según tu fecha objetivo, y te enviamos un mockup digital de cómo se ve el logo aplicado sobre el producto final. Apruebas antes de producir — sin sorpresas."
             highlights={[
               "Respuesta el mismo día hábil",
@@ -72,6 +88,7 @@ export default function ComoFuncionaPage() {
           <Step
             number="04"
             title="Producir y despachar"
+            icon={<DeliveryIcon className="h-7 w-7 text-bolg-text" />}
             body="Apruebas, emitimos factura electrónica a nombre de tu empresa y entramos a producción. La forma de pago habitual es 50% al confirmar la orden y 50% antes del despacho. Despachamos a todo Chile vía partner logístico, con tracking compartido."
             highlights={[
               "Factura electrónica con razón social + RUT",
@@ -99,7 +116,10 @@ export default function ComoFuncionaPage() {
 
           <div className="mt-12 grid gap-6 lg:grid-cols-2 lg:gap-8">
             <article className="border border-bolg-border bg-bolg-bg p-8 lg:p-10">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-bolg-text/50">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-bolg-text/30 text-bolg-text">
+                <BoltIcon className="h-6 w-6" />
+              </div>
+              <p className="mt-5 text-[10px] uppercase tracking-[0.22em] text-bolg-text/50">
                 Escenario A
               </p>
               <h3 className="mt-3 font-bolg-heading text-xl uppercase tracking-[0.08em] text-bolg-text sm:text-2xl">
@@ -117,7 +137,10 @@ export default function ComoFuncionaPage() {
             </article>
 
             <article className="border border-bolg-border bg-bolg-bg p-8 lg:p-10">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-bolg-text/50">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-bolg-text/30 text-bolg-text">
+                <CalendarIcon className="h-6 w-6" />
+              </div>
+              <p className="mt-5 text-[10px] uppercase tracking-[0.22em] text-bolg-text/50">
                 Escenario B
               </p>
               <h3 className="mt-3 font-bolg-heading text-xl uppercase tracking-[0.08em] text-bolg-text sm:text-2xl">
@@ -149,21 +172,25 @@ export default function ComoFuncionaPage() {
 
           <dl className="mt-12 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
             <TermCard
+              icon={<StackIcon className="h-6 w-6" />}
               label="Cantidad mínima"
               value="10 unidades"
               detail="Por producto. Puedes combinar varios productos distintos en una sola cotización."
             />
             <TermCard
+              icon={<SplitIcon className="h-6 w-6" />}
               label="Formas de pago"
               value="50 / 50"
               detail="50% al confirmar la orden, 50% antes del despacho. Vía transferencia electrónica."
             />
             <TermCard
+              icon={<ReceiptIcon className="h-6 w-6" />}
               label="Facturación"
               value="Electrónica"
               detail="A nombre de tu empresa. Necesitamos razón social, RUT y giro."
             />
             <TermCard
+              icon={<HourglassIcon className="h-6 w-6" />}
               label="Validez cotización"
               value="15 días"
               detail="Desde la emisión del PDF. Después de eso revisamos precios según disponibilidad."
@@ -202,12 +229,14 @@ export default function ComoFuncionaPage() {
 function Step({
   number,
   title,
+  icon,
   body,
   highlights,
   last,
 }: {
   number: string;
   title: string;
+  icon: ReactNode;
   body: string;
   highlights: readonly string[];
   last?: boolean;
@@ -220,10 +249,14 @@ function Step({
           : "grid gap-6 border-b border-bolg-border py-12 first:pt-0 lg:grid-cols-[140px_1fr] lg:gap-16 lg:py-20"
       }
     >
-      <div>
+      <div className="flex items-start gap-4 lg:flex-col lg:gap-5">
         <p className="font-bolg-heading text-5xl font-light leading-none text-bolg-text/30 sm:text-6xl lg:text-7xl">
           {number}
         </p>
+        {/* Icon en círculo: refuerza el tema del paso sin competir con el número */}
+        <div className="flex h-12 w-12 items-center justify-center rounded-full border border-bolg-text/30 lg:h-14 lg:w-14">
+          {icon}
+        </div>
       </div>
 
       <div className="max-w-3xl">
@@ -250,17 +283,22 @@ function Step({
 }
 
 function TermCard({
+  icon,
   label,
   value,
   detail,
 }: {
+  icon: ReactNode;
   label: string;
   value: string;
   detail: string;
 }) {
   return (
     <div className="border-t border-bolg-border pt-5">
-      <dt className="text-[10px] uppercase tracking-[0.22em] text-bolg-text/55">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-bolg-text/30 text-bolg-text">
+        {icon}
+      </div>
+      <dt className="mt-4 text-[10px] uppercase tracking-[0.22em] text-bolg-text/55">
         {label}
       </dt>
       <dd className="mt-3 font-bolg-heading text-3xl font-light leading-none text-bolg-text sm:text-4xl">

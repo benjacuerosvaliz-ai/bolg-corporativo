@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  HandshakeIcon,
+  PencilIcon,
+  ChartIcon,
+  DiamondIcon,
+} from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "Casos de éxito",
@@ -34,24 +41,34 @@ const CLIENTS: readonly Client[] = [
   { name: "MyPYMES Chilenas", logoSlug: "mypymes" },
 ];
 
-const VALUE_PROPS = [
+type ValueProp = {
+  title: string;
+  body: string;
+  icon: ReactNode;
+};
+
+const VALUE_PROPS: readonly ValueProp[] = [
   {
     title: "Productos que se usan",
     body: "Mochilas y botellas BØLG son artículos que el equipo lleva al día siguiente del onboarding. No quedan en un cajón. Eso eleva el ROI del regalo corporativo respecto a un mug genérico o un cuaderno.",
+    icon: <HandshakeIcon className="h-6 w-6" />,
   },
   {
     title: "Personalización con criterio",
     body: "Trabajamos la aplicación del logo cuidando proporción, zona y técnica para que se vea bien — no aplastamos el logo del cliente sobre un producto cualquiera. Mockup digital de aprobación antes de producir.",
+    icon: <PencilIcon className="h-6 w-6" />,
   },
   {
     title: "Stock real, no promesas",
     body: "La ficha de cada producto muestra inventario en tiempo real desde nuestra bodega. Si necesitas 200 unidades para un evento en 3 semanas, el sitio te dice si es viable antes de cotizar.",
+    icon: <ChartIcon className="h-6 w-6" />,
   },
   {
     title: "Operación premium, precio razonable",
     body: "Factura electrónica, pago 50/50, despacho a todo Chile, lead time confirmado por escrito. La calidad BØLG con la formalidad que finanzas corporativas necesita.",
+    icon: <DiamondIcon className="h-6 w-6" />,
   },
-] as const;
+];
 
 export default function CasosDeExitoPage() {
   return (
@@ -118,10 +135,16 @@ export default function CasosDeExitoPage() {
           <dl className="mt-12 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:gap-y-16">
             {VALUE_PROPS.map((v, i) => (
               <div key={v.title} className="border-t border-bolg-border pt-6">
-                <p className="font-bolg-heading text-3xl font-light leading-none text-bolg-text/30 sm:text-4xl">
-                  {String(i + 1).padStart(2, "0")}
-                </p>
-                <dt className="mt-4 font-bolg-heading text-lg uppercase tracking-[0.08em] text-bolg-text sm:text-xl">
+                <div className="flex items-start gap-4">
+                  {/* Icon en círculo: ancla visual + número de orden al lado */}
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-bolg-text/30 text-bolg-text">
+                    {v.icon}
+                  </div>
+                  <p className="font-bolg-heading text-3xl font-light leading-none text-bolg-text/30 sm:text-4xl">
+                    {String(i + 1).padStart(2, "0")}
+                  </p>
+                </div>
+                <dt className="mt-5 font-bolg-heading text-lg uppercase tracking-[0.08em] text-bolg-text sm:text-xl">
                   {v.title}
                 </dt>
                 <dd className="mt-3 max-w-prose font-bolg-body text-sm normal-case tracking-normal text-bolg-text/75 sm:text-base">

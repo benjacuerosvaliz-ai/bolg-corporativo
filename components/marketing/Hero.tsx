@@ -87,36 +87,27 @@ export function Hero() {
           </h2>
 
           <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4 lg:mt-12">
-            <Link
+            <CategoryCard
               href="/catalogo?category=Mochilas+y+Bolsos"
-              className="group relative flex h-48 items-end overflow-hidden bg-bolg-image-bg-dark p-6 text-bolg-button-text transition hover:bg-bolg-text sm:h-56 lg:h-72"
-            >
-              <p className="text-xs uppercase tracking-[0.22em] opacity-80 transition group-hover:opacity-100">
-                Mochilas y bolsos
-                <span aria-hidden className="ml-2 inline-block transition group-hover:translate-x-1">→</span>
-              </p>
-            </Link>
-
-            <Link
+              imageSrc="/brand/categoria-mochilas-y-bolsos.jpg"
+              label="Mochilas y bolsos"
+            />
+            <CategoryCard
               href="/catalogo?category=Botellas"
-              className="group relative flex h-48 items-end overflow-hidden bg-bolg-image-bg-light p-6 transition hover:bg-bolg-image-bg-dark hover:text-bolg-button-text sm:h-56 lg:h-72"
-            >
-              <p className="text-xs uppercase tracking-[0.22em] text-bolg-text/70 transition group-hover:text-bolg-button-text">
-                Botellas
-                <span aria-hidden className="ml-2 inline-block transition group-hover:translate-x-1">→</span>
-              </p>
-            </Link>
-
-            <Link
+              imageSrc="/brand/categoria-botellas.jpg"
+              label="Botellas"
+            />
+            <CategoryCard
               href="/catalogo?category=Accesorios"
-              className="group relative flex h-48 items-end overflow-hidden bg-bolg-image-bg-dark p-6 text-bolg-button-text transition hover:bg-bolg-text sm:h-56 lg:h-72"
-            >
-              <p className="text-xs uppercase tracking-[0.22em] opacity-80 transition group-hover:opacity-100">
-                Accesorios
-                <span aria-hidden className="ml-2 inline-block transition group-hover:translate-x-1">→</span>
-              </p>
-            </Link>
-
+              imageSrc="/brand/categoria-accesorios.jpg"
+              label="Accesorios"
+            />
+            {/*
+              Cuarta card sin foto: el concepto "tu logo aquí" se comunica
+              mejor con un bloque negro sólido + el logo BØLG inverted al
+              lado. Si tuviera foto, dejaría de ser "tu logo" para ser "el
+              logo BØLG aplicado". Mantener el contraste con las 3 fotos.
+            */}
             <Link
               href="/catalogo"
               className="group relative flex h-48 items-end justify-between overflow-hidden bg-bolg-text p-6 text-bolg-button-text transition hover:opacity-90 sm:h-56 lg:h-72"
@@ -131,5 +122,45 @@ export function Hero() {
         </div>
       </section>
     </>
+  );
+}
+
+/**
+ * Card de categoría con foto lifestyle de fondo + overlay oscuro + label
+ * abajo. Usa next/image fill + object-cover. Hover hace un sutil zoom-in
+ * (scale-105) sobre la imagen para feedback visual.
+ */
+function CategoryCard({
+  href,
+  imageSrc,
+  label,
+}: {
+  href: string;
+  imageSrc: string;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href as never}
+      className="group relative flex h-48 items-end overflow-hidden p-6 text-bolg-button-text sm:h-56 lg:h-72"
+    >
+      {/* Foto lifestyle a pantalla completa del card */}
+      <Image
+        src={imageSrc}
+        alt=""
+        fill
+        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+        className="object-cover transition duration-500 group-hover:scale-105"
+      />
+      {/* Overlay gradient oscuro abajo para legibilidad del label sin matar la foto */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition group-hover:from-black/85"
+      />
+      <p className="relative text-xs uppercase tracking-[0.22em]">
+        {label}
+        <span aria-hidden className="ml-2 inline-block transition group-hover:translate-x-1">→</span>
+      </p>
+    </Link>
   );
 }

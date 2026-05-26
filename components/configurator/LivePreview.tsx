@@ -13,7 +13,10 @@ type Props = {
   logoUrl: string | null;
 };
 
-/** Tamaño interno del Stage Konva (los pixeles reales del canvas). */
+/**
+ * Tamaño interno del Stage Konva. CSS responsive lo escala al container,
+ * la lógica interna trabaja en este sistema de coordenadas.
+ */
 const CANVAS_SIZE = 900;
 
 type LogoBox = {
@@ -42,10 +45,6 @@ function useHtmlImage(src: string | null): HTMLImageElement | null {
   return img;
 }
 
-/**
- * Coloca el logo centrado sobre el producto, escalado a ~25% del canvas.
- * Es un punto de partida razonable — el cliente lo va a mover/escalar libre.
- */
 function initialLogoBox(logoImg: HTMLImageElement): LogoBox {
   const target = CANVAS_SIZE * 0.25;
   const logoAspect = logoImg.width / logoImg.height;
@@ -61,15 +60,26 @@ function initialLogoBox(logoImg: HTMLImageElement): LogoBox {
 }
 
 export function LivePreview({ productImage, area, logoUrl }: Props) {
-  const productImg = useHtmlImage(productImage.url);
   const logoImg = useHtmlImage(logoUrl);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState<number>(CANVAS_SIZE);
+
+  // Observa el tamaño real del container para mantener el Stage responsive.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) setContainerSize(entry.contentRect.width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const [logoBox, setLogoBox] = useState<LogoBox | null>(null);
   const logoRef = useRef<Konva.Image | null>(null);
   const transformerRef = useRef<Konva.Transformer | null>(null);
 
-  // Cuando llega un logo nuevo, posicionar centrado y a un tamaño razonable.
-  // Si el cliente ya lo movió, no resetear al cambiar otros parámetros.
   useEffect(() => {
     if (logoImg) {
       setLogoBox(initialLogoBox(logoImg));
@@ -78,7 +88,6 @@ export function LivePreview({ productImage, area, logoUrl }: Props) {
     }
   }, [logoImg]);
 
-  // Adjunta el Transformer al logo cuando está listo.
   useEffect(() => {
     if (transformerRef.current && logoRef.current) {
       transformerRef.current.nodes([logoRef.current]);
@@ -86,23 +95,10 @@ export function LivePreview({ productImage, area, logoUrl }: Props) {
     }
   }, [logoBox, logoImg]);
 
-  // Imagen del producto: contain, manteniendo aspect ratio dentro del canvas.
-  const productNaturalAspect =
-    productImg && productImg.height > 0
-      ? productImg.width / productImg.height
-      : 1;
-  const productDrawW =
-    productNaturalAspect >= 1
-      ? CANVAS_SIZE
-      : CANVAS_SIZE * productNaturalAspect;
-  const productDrawH =
-    productNaturalAspect >= 1
-      ? CANVAS_SIZE / productNaturalAspect
-      : CANVAS_SIZE;
-  const productX = (CANVAS_SIZE - productDrawW) / 2;
-  const productY = (CANVAS_SIZE - productDrawH) / 2;
+  // Factor de escala entre coordenadas internas (CANVAS_SIZE) y CSS.
+  const scale = containerSize / CANVAS_SIZE;
 
-  // Tamaño en cm reales del logo según el pxPerCm de la zona (referencia).
+  // Tamaño en cm reales (referencia visual, usando pxPerCm de la zona principal).
   const sizeCm =
     area && logoBox
       ? {
@@ -118,26 +114,26 @@ export function LivePreview({ productImage, area, logoUrl }: Props) {
   return (
     <div className="space-y-3">
       <div
-        className="relative mx-auto w-full overflow-hidden rounded-bolg-card bg-bolg-image-bg-light"
-        style={{ aspectRatio: "1 / 1", maxHeight: "70vh" }}
+        ref={containerRef}
+        className="relative mx-auto aspect-square w-full overflow-hidden rounded-bolg-card bg-bolg-image-bg-light"
       >
+        {/* Imagen del producto como background HTML (responsive nativo) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={productImage.url}
+          alt={productImage.altText ?? "Producto"}
+          className="absolute inset-0 h-full w-full object-contain"
+          draggable={false}
+        />
+
+        {/* Stage Konva transparente encima, solo para el logo del cliente */}
         <Stage
-          width={CANVAS_SIZE}
-          height={CANVAS_SIZE}
-          className="absolute inset-0 h-full w-full"
-          style={{ width: "100%", height: "100%" }}
+          width={containerSize}
+          height={containerSize}
+          scaleX={scale}
+          scaleY={scale}
+          className="absolute inset-0"
         >
-          <Layer listening={false}>
-            {productImg && (
-              <KonvaImage
-                image={productImg}
-                x={productX}
-                y={productY}
-                width={productDrawW}
-                height={productDrawH}
-              />
-            )}
-          </Layer>
           <Layer>
             {logoImg && logoBox && (
               <>
@@ -197,7 +193,7 @@ export function LivePreview({ productImage, area, logoUrl }: Props) {
         </Stage>
 
         {!logoImg && (
-          <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-6">
+          <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
             <div className="rounded-bolg-card border border-bolg-border bg-bolg-bg/95 px-4 py-2 text-center backdrop-blur">
               <p className="text-[10px] uppercase tracking-[0.18em] text-bolg-text/60">
                 Sube tu logo para previsualizarlo

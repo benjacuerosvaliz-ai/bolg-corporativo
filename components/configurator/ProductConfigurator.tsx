@@ -13,6 +13,7 @@ import { PricingPanel } from "./PricingPanel";
 import { StockAnalysis } from "./StockAnalysis";
 import { LogoUploader } from "./LogoUploader";
 import { LivePreview } from "./LivePreview";
+import { AddToQuoteButton } from "./AddToQuoteButton";
 
 type Props = {
   product: CorporateProduct;
@@ -185,14 +186,16 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
           />
         )}
 
-        <button
-          type="button"
-          disabled
-          className="w-full rounded-bolg-button bg-bolg-button px-8 py-4 text-xs uppercase tracking-[0.2em] text-bolg-button-text opacity-60"
-          title="Disponible en Fase 2e"
-        >
-          Agregar a cotización (Fase 2e)
-        </button>
+        <AddToQuoteButton
+          product={product}
+          variant={selectedVariant}
+          technique={activeTechnique}
+          area={selectedArea}
+          quantity={quantity}
+          requiredDate={requiredDate}
+          occasion={occasion}
+          pricing={pricing}
+        />
       </div>
     </div>
   );

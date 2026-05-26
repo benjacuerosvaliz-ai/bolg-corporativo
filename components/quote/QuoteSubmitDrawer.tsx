@@ -51,22 +51,31 @@ export function QuoteSubmitDrawer({
     };
   }, [open]);
 
+  // Vaciar el carrito sólo cuando el usuario CIERRA el drawer del SuccessView.
+  // Si lo vaciamos apenas el server contesta ok, el padre (QuoteBuilder)
+  // detecta cart vacío y re-renderiza al estado "cotización vacía", botando
+  // el drawer antes de que el usuario alcance a leer la confirmación.
+  const submitted = state?.ok ?? false;
+  const handleClose = () => {
+    if (submitted) {
+      clearCart();
+    }
+    onClose();
+  };
+
   // Cerrar con Escape (excepto cuando hay request en vuelo).
+  // Inline la lógica de handleClose para que el listener capture el `submitted`
+  // actual sin depender de un closure obsoleto.
   useEffect(() => {
     if (!open || pending) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key !== "Escape") return;
+      if (submitted) clearCart();
+      onClose();
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [open, pending, onClose]);
-
-  // Cuando llega un éxito, vaciamos el carrito (lo enviamos ya).
-  useEffect(() => {
-    if (state?.ok) {
-      clearCart();
-    }
-  }, [state]);
+  }, [open, pending, onClose, submitted]);
 
   const errors = state && !state.ok ? state.errors : {};
   const formError = state && !state.ok ? state.formError : undefined;
@@ -85,7 +94,7 @@ export function QuoteSubmitDrawer({
       {/* Backdrop */}
       <button
         type="button"
-        onClick={pending ? undefined : onClose}
+        onClick={pending ? undefined : handleClose}
         aria-label="Cerrar"
         className="absolute inset-0 bg-bolg-text/40 backdrop-blur-sm"
         disabled={pending}
@@ -104,7 +113,7 @@ export function QuoteSubmitDrawer({
           </span>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={pending}
             aria-label="Cerrar"
             className="flex h-10 w-10 items-center justify-center rounded-bolg-button text-bolg-text hover:bg-bolg-image-bg-light disabled:cursor-not-allowed disabled:opacity-40"
@@ -119,7 +128,7 @@ export function QuoteSubmitDrawer({
           <SuccessView
             quoteNumber={state.quoteNumber}
             dryRun={state.dryRun}
-            onClose={onClose}
+            onClose={handleClose}
           />
         ) : (
           <form

@@ -103,20 +103,23 @@ export function Hero() {
               label="Accesorios"
             />
             {/*
-              Cuarta card sin foto: el concepto "tu logo aquí" se comunica
-              mejor con un bloque negro sólido + el logo BØLG inverted al
-              lado. Si tuviera foto, dejaría de ser "tu logo" para ser "el
-              logo BØLG aplicado". Mantener el contraste con las 3 fotos.
+              Cuarta card: CTA al catálogo completo. Bloque negro sólido con
+              el logo BØLG dominando el centro (wordmark grande, no sólo al
+              costado como antes) + label "Todos los productos" abajo. Sirve
+              como anchor de marca dentro del set de categorías.
             */}
             <Link
               href="/catalogo"
-              className="group relative flex h-48 items-end justify-between overflow-hidden bg-bolg-text p-6 text-bolg-button-text transition hover:opacity-90 sm:h-56 lg:h-72"
+              className="group relative flex h-48 flex-col items-center justify-center gap-6 overflow-hidden bg-bolg-text p-6 text-bolg-button-text transition hover:opacity-90 sm:h-56 lg:h-72"
             >
+              <Logo
+                variant="inverted"
+                className="h-10 w-auto opacity-90 transition group-hover:opacity-100 sm:h-12 lg:h-14"
+              />
               <p className="text-xs uppercase tracking-[0.22em] opacity-80 transition group-hover:opacity-100">
-                Tu logo aquí
+                Todos los productos
                 <span aria-hidden className="ml-2 inline-block transition group-hover:translate-x-1">→</span>
               </p>
-              <Logo variant="inverted" className="h-5 w-auto opacity-80" />
             </Link>
           </div>
         </div>

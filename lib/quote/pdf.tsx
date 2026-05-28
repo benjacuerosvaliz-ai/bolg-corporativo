@@ -3,6 +3,7 @@ import {
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
   pdf,
   Font,
@@ -155,10 +156,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  cellProduct: { width: "44%", paddingRight: 8 },
+  cellProduct: { width: "44%", paddingRight: 8, flexDirection: "row" },
   cellQty: { width: "10%", textAlign: "right" },
   cellUnit: { width: "22%", textAlign: "right" },
   cellTotal: { width: "24%", textAlign: "right" },
+  thumb: {
+    width: 38,
+    height: 38,
+    marginRight: 8,
+    objectFit: "contain",
+    backgroundColor: colors.bgMuted,
+  },
+  productInfo: { flex: 1 },
   productTitle: {
     fontFamily: "Helvetica-Bold",
     fontSize: 10,
@@ -334,16 +343,26 @@ export function QuotePDF({
             return (
               <View key={line.id} style={styles.tableRow} wrap={false}>
                 <View style={styles.cellProduct}>
-                  <Text style={styles.productTitle}>{line.productTitle}</Text>
-                  <Text style={styles.productMeta}>
-                    {line.productCategory} · Variante: {line.variantTitle}
-                  </Text>
-                  <Text style={styles.productMeta}>
-                    Técnica: {line.techniqueLabel} · Zona: {line.areaLabel}
-                  </Text>
-                  <Text style={styles.productMeta}>
-                    Fecha objetivo: {formatDateLong(new Date(line.requiredDate))}
-                  </Text>
+                  {/* Thumbnail del producto + textos al lado, para que el
+                      cliente recuerde visualmente qué cotizó. react-pdf
+                      descarga la imagen del CDN al generar el PDF. */}
+                  {line.productImageUrl ? (
+                    <Image src={line.productImageUrl} style={styles.thumb} />
+                  ) : (
+                    <View style={styles.thumb} />
+                  )}
+                  <View style={styles.productInfo}>
+                    <Text style={styles.productTitle}>{line.productTitle}</Text>
+                    <Text style={styles.productMeta}>
+                      {line.productCategory} · Variante: {line.variantTitle}
+                    </Text>
+                    <Text style={styles.productMeta}>
+                      Técnica: {line.techniqueLabel} · Zona: {line.areaLabel}
+                    </Text>
+                    <Text style={styles.productMeta}>
+                      Fecha objetivo: {formatDateLong(new Date(line.requiredDate))}
+                    </Text>
+                  </View>
                 </View>
                 <Text style={styles.cellQty}>{line.quantity}</Text>
                 <Text style={styles.cellUnit}>{formatCLP(unitTotal)}</Text>

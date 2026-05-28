@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MobileMenu } from "./MobileMenu";
-import { QuoteBadge } from "./QuoteBadge";
+import { QuoteMiniCart } from "./QuoteMiniCart";
 
 const NAV_LINKS = [
   { href: "/catalogo", label: "Catálogo" },
@@ -44,8 +44,8 @@ export function BrandHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {/* Badge del carrito de cotización: visible siempre que haya líneas. */}
-          <QuoteBadge />
+          {/* Mini-cart: badge + drawer lateral con resumen y CTA a /cotizador. */}
+          <QuoteMiniCart />
           {/* Desktop CTA: "Ver catálogo" más explícito que "Cotizar ahora". */}
           <Link
             href="/catalogo"

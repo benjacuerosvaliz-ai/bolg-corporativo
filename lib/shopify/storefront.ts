@@ -63,9 +63,11 @@ async function storefrontFetch<T>(
 export async function listCorporateProducts(): Promise<CorporateProduct[]> {
   if (USE_MOCK_PRODUCTS) return mockCorporateProducts;
 
+  // first: 100 da holgura sobre los ~50 productos corporativos actuales.
+  // Si el catálogo crece más allá de 100 habría que paginar con cursors.
   const data = await storefrontFetch<{
     products: { edges: { node: RawShopifyProduct }[] };
-  }>(LIST_CORPORATE_PRODUCTS, { first: 50 });
+  }>(LIST_CORPORATE_PRODUCTS, { first: 100 });
 
   // Tolerante en bulk: filtra productos sin metafields completos con warn
   // server-side. Productos individuales (getCorporateProductByHandle) siguen

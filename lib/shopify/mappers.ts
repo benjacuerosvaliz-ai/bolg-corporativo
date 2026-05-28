@@ -143,6 +143,9 @@ function deriveCategory(productType: string, handle: string): string {
   const h = handle.toLowerCase();
   if (h.startsWith("mochila-") || h.startsWith("bolso-")) return "Mochilas y Bolsos";
   if (h.startsWith("botella-")) return "Botellas";
+  if (h.startsWith("mug-") || h.startsWith("taza-") || h.startsWith("tazon-")) {
+    return "Mugs y Tazas";
+  }
   if (h.startsWith("jockey-") || h.startsWith("billetera-") || h.startsWith("llavero-")) {
     return "Accesorios";
   }
@@ -150,6 +153,9 @@ function deriveCategory(productType: string, handle: string): string {
   const pt = productType.toLowerCase();
   if (pt.includes("mochila") || pt.includes("bolso")) return "Mochilas y Bolsos";
   if (pt.includes("botella")) return "Botellas";
+  if (pt.includes("mug") || pt.includes("taza") || pt.includes("tazón")) {
+    return "Mugs y Tazas";
+  }
   if (pt.includes("jockey") || pt.includes("billetera") || pt.includes("llavero")) {
     return "Accesorios";
   }

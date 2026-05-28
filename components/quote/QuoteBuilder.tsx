@@ -158,24 +158,21 @@ function LineRow({ line }: { line: CartLine }) {
 }
 
 function QuantityInline({ line }: { line: CartLine }) {
+  // ±1 por click (igual que el stepper de la PDP). Nota: no re-calculamos
+  // pricing del lado del browser para no duplicar el engine. Si el cliente
+  // ajusta mucho, vuelve a la PDP. En Fase 5 (server-side) recalculamos.
   const dec = () => {
-    const next = Math.max(1, line.quantity - 10);
-    updateLine(line.id, {
-      quantity: next,
-      // Nota: no re-calculamos pricing del lado del browser para no
-      // duplicar el engine. Si el cliente quiere ajustar mucho, vuelve
-      // a la PDP. En Fase 4 (server-side cotización) recalculamos.
-    });
+    updateLine(line.id, { quantity: Math.max(1, line.quantity - 1) });
   };
   const inc = () => {
-    updateLine(line.id, { quantity: line.quantity + 10 });
+    updateLine(line.id, { quantity: line.quantity + 1 });
   };
   return (
     <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-bolg-text">
       <button
         type="button"
         onClick={dec}
-        aria-label="Bajar cantidad"
+        aria-label="Restar 1"
         className="flex h-8 w-8 items-center justify-center rounded-bolg-button border border-bolg-border hover:border-bolg-text"
       >
         −
@@ -186,7 +183,7 @@ function QuantityInline({ line }: { line: CartLine }) {
       <button
         type="button"
         onClick={inc}
-        aria-label="Subir cantidad"
+        aria-label="Sumar 1"
         className="flex h-8 w-8 items-center justify-center rounded-bolg-button border border-bolg-border hover:border-bolg-text"
       >
         +

@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getCorporateProductByHandle } from "@/lib/shopify/storefront";
+import {
+  getCorporateProductByHandle,
+  listCorporateProducts,
+} from "@/lib/shopify/storefront";
 import { getInventoryLevel } from "@/lib/shopify/admin";
 import { ProductConfigurator } from "@/components/configurator/ProductConfigurator";
+import {
+  ColorSwatches,
+  type ColorOption,
+} from "@/components/configurator/ColorSwatches";
+import { splitModelColor } from "@/lib/utils/product-title";
 
 // La PDP siempre dinámica: stock + metafields cambian, y queremos que el
 // switch USE_MOCK_PRODUCTS=true/false no quede atrapado en cache estática.
@@ -37,6 +45,28 @@ export default async function PDPPage({ params }: Props) {
   );
   const inventoryByVariantId = Object.fromEntries(inventoryEntries);
 
+  // Hermanos de color: otros productos corporativos con el mismo modelo base
+  // (título antes del " - "). Cada color es un producto separado en Shopify.
+  const { model } = splitModelColor(product.title);
+  const allProducts = await listCorporateProducts();
+  const colorOptions: ColorOption[] = allProducts
+    .filter((p) => splitModelColor(p.title).model === model)
+    .map((p) => {
+      const { color } = splitModelColor(p.title);
+      return {
+        handle: p.handle,
+        color: color ?? p.title,
+        imageUrl: p.featuredImage.url,
+        isCurrent: p.handle === product.handle,
+      };
+    })
+    // Orden estable: el actual primero, resto alfabético por color.
+    .sort((a, b) => {
+      if (a.isCurrent) return -1;
+      if (b.isCurrent) return 1;
+      return a.color.localeCompare(b.color);
+    });
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 lg:px-10 lg:py-10">
       <Link
@@ -57,6 +87,8 @@ export default async function PDPPage({ params }: Props) {
         <h1 className="mt-3 text-3xl font-light leading-[1.05] sm:text-4xl lg:text-5xl">
           {product.title}
         </h1>
+        {/* Swatches de color: otros colores del mismo modelo (si los hay) */}
+        <ColorSwatches options={colorOptions} />
       </header>
 
       <div className="mt-8">

@@ -6,6 +6,29 @@ import type {
   ShopifyImage,
   VolumeBreak,
 } from "./types";
+import { NO_PERSONALIZATION_TECHNIQUE_ID } from "./types";
+
+/**
+ * Técnica virtual "Sin personalización" — se agrega al final de printTechniques
+ * de cada producto para que el cliente pueda cotizar sin logo/impresión.
+ * Compatible con todas las zonas (availableAreaIds las llenamos en runtime
+ * con las zonas del producto para que el filtro por zona no la esconda).
+ */
+function buildNoPersonalizationTechnique(
+  areaIds: string[],
+): PrintTechnique {
+  return {
+    id: NO_PERSONALIZATION_TECHNIQUE_ID,
+    label: "Sin personalización",
+    description:
+      "El producto se entrega en blanco, tal como viene de fábrica. Sin aplicación de logo ni impresión.",
+    basePriceUnit: 0,
+    extraPositionPrice: 0,
+    setupFee: 0,
+    extraLeadDays: 0,
+    availableAreaIds: areaIds,
+  };
+}
 
 /**
  * Tipos parciales del response GraphQL — sin generar codegen completo.
@@ -97,10 +120,16 @@ export function mapShopifyProductToCorporate(
     : 0;
   const volumePricing = parseVolumePricing(raw.volumePricing.value, raw.handle);
   const printAreas = parsePrintAreas(raw.printAreas.value, raw.handle);
-  const printTechniques = parsePrintTechniques(
+  const parsedTechniques = parsePrintTechniques(
     raw.printTechniques.value,
     raw.handle,
   );
+  // "Sin personalización" al final: el default sigue siendo la primera técnica
+  // real. Compatible con todas las zonas del producto.
+  const printTechniques: PrintTechnique[] = [
+    ...parsedTechniques,
+    buildNoPersonalizationTechnique(printAreas.map((a) => a.id)),
+  ];
 
   return {
     id: raw.id,

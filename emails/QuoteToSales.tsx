@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-head-element -- HTML email, no es una página Next */
 import type { CartLine } from "@/lib/quote/storage";
 import { formatCLP, IVA_RATE } from "@/lib/utils/money";
+import { NO_PERSONALIZATION_TECHNIQUE_ID } from "@/lib/shopify/types";
 
 /**
  * Notificación interna al equipo BØLG cuando entra una nueva cotización.
@@ -346,7 +347,10 @@ export function QuoteToSales({
                                       lineHeight: 1.4,
                                     }}
                                   >
-                                    {line.techniqueLabel} · {line.areaLabel}
+                                    {line.techniqueId ===
+                                    NO_PERSONALIZATION_TECHNIQUE_ID
+                                      ? "Sin personalización — se entrega en blanco"
+                                      : `${line.techniqueLabel} · ${line.areaLabel}`}
                                   </p>
                                   <p
                                     style={{

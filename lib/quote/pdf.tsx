@@ -10,6 +10,7 @@ import {
 } from "@react-pdf/renderer";
 import type { CartLine } from "./storage";
 import { formatCLP, IVA_RATE } from "@/lib/utils/money";
+import { NO_PERSONALIZATION_TECHNIQUE_ID } from "@/lib/shopify/types";
 
 /**
  * Generación del PDF profesional de cotización corporativa.
@@ -357,7 +358,9 @@ export function QuotePDF({
                       {line.productCategory} · Variante: {line.variantTitle}
                     </Text>
                     <Text style={styles.productMeta}>
-                      Técnica: {line.techniqueLabel} · Zona: {line.areaLabel}
+                      {line.techniqueId === NO_PERSONALIZATION_TECHNIQUE_ID
+                        ? "Sin personalización — se entrega en blanco"
+                        : `Técnica: ${line.techniqueLabel} · Zona: ${line.areaLabel}`}
                     </Text>
                     <Text style={styles.productMeta}>
                       Fecha objetivo: {formatDateLong(new Date(line.requiredDate))}

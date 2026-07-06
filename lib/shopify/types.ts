@@ -55,7 +55,18 @@ export type PrintTechniqueId =
   | "bordado"
   | "transfer_dtf"
   | "laser"
-  | "sublimacion";
+  | "sublimacion"
+  | "sin_personalizacion";
+
+/**
+ * ID de la técnica virtual "Sin personalización" — se inyecta en todos los
+ * productos al mapear desde Shopify. Precio 0, sin setup, sin lead extra;
+ * compatible con todas las zonas. Se usa para vender el producto en blanco.
+ * Ver [[reference-khumbu-spa]] — surgió cuando Craighouse pidió mochilas sin
+ * logo y no había forma de cotizar sin cobrar el fee de personalización.
+ */
+export const NO_PERSONALIZATION_TECHNIQUE_ID: PrintTechniqueId =
+  "sin_personalizacion";
 
 export type PrintTechnique = {
   id: PrintTechniqueId;

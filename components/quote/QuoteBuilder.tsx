@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/lib/quote/use-cart";
 import { removeLine, clearCart, updateLine, type CartLine } from "@/lib/quote/storage";
 import { formatCLP, IVA_RATE } from "@/lib/utils/money";
+import { NO_PERSONALIZATION_TECHNIQUE_ID } from "@/lib/shopify/types";
 import { QuoteSubmitDrawer } from "./QuoteSubmitDrawer";
 
 export function QuoteBuilder() {
@@ -127,8 +128,14 @@ function LineRow({ line }: { line: CartLine }) {
           {line.productTitle}
         </h3>
         <dl className="grid grid-cols-2 gap-x-4 gap-y-1 font-bolg-body text-xs normal-case tracking-normal text-bolg-text/70 sm:grid-cols-3">
-          <Detail label="Técnica" value={line.techniqueLabel} />
-          <Detail label="Zona" value={line.areaLabel} />
+          {line.techniqueId === NO_PERSONALIZATION_TECHNIQUE_ID ? (
+            <Detail label="Personalización" value="Sin personalización" />
+          ) : (
+            <>
+              <Detail label="Técnica" value={line.techniqueLabel} />
+              <Detail label="Zona" value={line.areaLabel} />
+            </>
+          )}
           <Detail label="Fecha objetivo" value={formatDateShort(line.requiredDate)} />
           {line.occasion && <Detail label="Contexto" value={line.occasion} />}
         </dl>

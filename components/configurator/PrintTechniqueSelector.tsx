@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { PrintTechnique } from "@/lib/shopify/types";
+import { NO_PERSONALIZATION_TECHNIQUE_ID } from "@/lib/shopify/types";
 import { formatCLP } from "@/lib/utils/money";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -49,6 +50,7 @@ export function PrintTechniqueSelector({
       <div className="mt-3 space-y-2">
         {compatible.map((t) => {
           const isActive = t.id === selectedId;
+          const isNoPersonalization = t.id === NO_PERSONALIZATION_TECHNIQUE_ID;
           return (
             <div
               key={t.id}
@@ -70,44 +72,55 @@ export function PrintTechniqueSelector({
                       {t.label}
                     </span>
                     <span className="font-bolg-body text-xs tracking-normal text-bolg-text">
-                      +{formatCLP(t.basePriceUnit)}{" "}
-                      <span className="text-bolg-text/50">/u</span>
+                      {isNoPersonalization ? (
+                        <span className="text-bolg-text/60">Sin costo</span>
+                      ) : (
+                        <>
+                          +{formatCLP(t.basePriceUnit)}{" "}
+                          <span className="text-bolg-text/50">/u</span>
+                        </>
+                      )}
                     </span>
                   </div>
                   <p className="font-bolg-body text-xs normal-case tracking-normal text-bolg-text/65">
                     {t.description}
                   </p>
-                  <div className="flex flex-wrap gap-3 text-[10px] uppercase tracking-[0.18em] text-bolg-text/50">
-                    {t.setupFee > 0 && (
-                      <span>Setup {formatCLP(t.setupFee)}</span>
-                    )}
-                    {t.extraLeadDays > 0 && (
-                      <span>+{t.extraLeadDays}d producción</span>
-                    )}
-                    {t.extraPositionPrice > 0 && (
-                      <span>
-                        +{formatCLP(t.extraPositionPrice)}/u zona extra
-                      </span>
-                    )}
-                  </div>
+                  {!isNoPersonalization && (
+                    <div className="flex flex-wrap gap-3 text-[10px] uppercase tracking-[0.18em] text-bolg-text/50">
+                      {t.setupFee > 0 && (
+                        <span>Setup {formatCLP(t.setupFee)}</span>
+                      )}
+                      {t.extraLeadDays > 0 && (
+                        <span>+{t.extraLeadDays}d producción</span>
+                      )}
+                      {t.extraPositionPrice > 0 && (
+                        <span>
+                          +{formatCLP(t.extraPositionPrice)}/u zona extra
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </button>
 
-                {/* Botón "?" abre modal con info detallada de la técnica */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOpenTechnique({
-                      id: t.id,
-                      label: t.label,
-                      description: t.description,
-                    });
-                  }}
-                  aria-label={`Más información sobre ${t.label}`}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center self-start rounded-full border border-bolg-text/30 text-[11px] font-bolg-heading text-bolg-text/60 transition hover:border-bolg-text hover:text-bolg-text"
-                >
-                  ?
-                </button>
+                {/* Botón "?" abre modal con info detallada — omitido para
+                    "Sin personalización" porque el label ya lo explica todo. */}
+                {!isNoPersonalization && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenTechnique({
+                        id: t.id,
+                        label: t.label,
+                        description: t.description,
+                      });
+                    }}
+                    aria-label={`Más información sobre ${t.label}`}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center self-start rounded-full border border-bolg-text/30 text-[11px] font-bolg-heading text-bolg-text/60 transition hover:border-bolg-text hover:text-bolg-text"
+                  >
+                    ?
+                  </button>
+                )}
               </div>
             </div>
           );

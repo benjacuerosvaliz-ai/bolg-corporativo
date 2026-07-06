@@ -79,12 +79,19 @@ export function PricingPanel({
 
       <div className="mt-6 space-y-2 border-t border-bolg-border pt-5 font-bolg-body text-sm normal-case tracking-normal">
         <Row label={`Unitario neto (${quantity} u)`} value={formatCLP(unitTotal)} />
-        <Row label="  Producto" value={formatCLP(pricing.unitPriceNet)} muted />
-        <Row
-          label="  Personalización"
-          value={formatCLP(pricing.customizationUnitPrice)}
-          muted
-        />
+        {/* Cuando la técnica es "Sin personalización" el customizationUnitPrice
+            es 0 y desglosar Producto + Personalización ruidoso: el unitario
+            neto ya es el precio del producto. */}
+        {pricing.customizationUnitPrice > 0 && (
+          <>
+            <Row label="  Producto" value={formatCLP(pricing.unitPriceNet)} muted />
+            <Row
+              label="  Personalización"
+              value={formatCLP(pricing.customizationUnitPrice)}
+              muted
+            />
+          </>
+        )}
         {pricing.setupFee > 0 && (
           <Row label="Setup (única vez)" value={formatCLP(pricing.setupFee)} />
         )}

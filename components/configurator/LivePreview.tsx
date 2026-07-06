@@ -33,6 +33,13 @@ type Props = {
   /** Zona "principal" para referencia de cm reales. Puede ser null. */
   area: PrintArea | null;
   logoUrl: string | null;
+  /**
+   * Cuando el usuario eligió "Sin personalización" no queremos mostrar el
+   * overlay "Sube tu logo para previsualizarlo" (confunde — no hay dónde
+   * subirlo, el LogoUploader está oculto). Aún así se muestra la foto del
+   * producto para no dejar la columna vacía.
+   */
+  hideLogoPrompt?: boolean;
 };
 
 /**
@@ -82,7 +89,10 @@ function initialLogoBox(logoImg: HTMLImageElement): LogoBox {
 }
 
 export const LivePreview = forwardRef<LivePreviewHandle, Props>(
-  function LivePreview({ productImage, allImages, area, logoUrl }, ref) {
+  function LivePreview(
+    { productImage, allImages, area, logoUrl, hideLogoPrompt = false },
+    ref,
+  ) {
   const logoImg = useHtmlImage(logoUrl);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState<number>(CANVAS_SIZE);
@@ -293,7 +303,7 @@ export const LivePreview = forwardRef<LivePreviewHandle, Props>(
           </Layer>
         </Stage>
 
-        {!logoImg && (
+        {!logoImg && !hideLogoPrompt && (
           <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
             <div className="rounded-bolg-card border border-bolg-border bg-bolg-bg/95 px-4 py-2 text-center backdrop-blur">
               <p className="text-[10px] uppercase tracking-[0.18em] text-bolg-text/60">

@@ -1,4 +1,5 @@
 import type { CorporateProduct, PrintArea, PrintTechnique } from "./types";
+import { NO_PERSONALIZATION_TECHNIQUE_ID } from "./types";
 
 /**
  * Mock data para desarrollar antes de configurar metafields en Shopify.
@@ -114,7 +115,25 @@ const AREA_LATERAL = (label: string): PrintArea => ({
   pxPerCm: 40,
 });
 
-export const mockCorporateProducts: CorporateProduct[] = [
+/**
+ * Técnica virtual "Sin personalización" — misma que inyecta el mapper real.
+ * Se agrega al final de printTechniques de cada mock para paridad con Shopify.
+ */
+function noPersonalization(areaIds: string[]): PrintTechnique {
+  return {
+    id: NO_PERSONALIZATION_TECHNIQUE_ID,
+    label: "Sin personalización",
+    description:
+      "El producto se entrega en blanco, tal como viene de fábrica. Sin aplicación de logo ni impresión.",
+    basePriceUnit: 0,
+    extraPositionPrice: 0,
+    setupFee: 0,
+    extraLeadDays: 0,
+    availableAreaIds: areaIds,
+  };
+}
+
+const rawMockProducts: CorporateProduct[] = [
   {
     id: "mock_mochila_01",
     handle: "mock-mochila-estandar",
@@ -258,6 +277,18 @@ export const mockCorporateProducts: CorporateProduct[] = [
     tags: ["CORPORATIVO", "vestuario", "mock"],
   },
 ];
+
+// Post-process: inyectar "Sin personalización" en cada mock — paridad con el
+// mapper de Shopify real. Se hace acá y no en cada literal para mantener DRY.
+export const mockCorporateProducts: CorporateProduct[] = rawMockProducts.map(
+  (p) => ({
+    ...p,
+    printTechniques: [
+      ...p.printTechniques,
+      noPersonalization(p.printAreas.map((a) => a.id)),
+    ],
+  }),
+);
 
 export function mockProductByHandle(handle: string): CorporateProduct | null {
   return mockCorporateProducts.find((p) => p.handle === handle) ?? null;

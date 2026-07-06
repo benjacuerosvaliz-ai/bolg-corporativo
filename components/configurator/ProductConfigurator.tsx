@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import type { CorporateProduct } from "@/lib/shopify/types";
+import { NO_PERSONALIZATION_TECHNIQUE_ID } from "@/lib/shopify/types";
 import { calculateLinePricing } from "@/lib/quote/pricing";
 import { analyzeStock } from "@/lib/quote/stock-analysis";
 import { VariantSelector } from "./VariantSelector";
@@ -60,6 +61,11 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
     const current = compatible.find((t) => t.id === techniqueId);
     return current ?? compatible[0] ?? null;
   }, [product.printTechniques, areaId, techniqueId]);
+
+  // "Sin personalización" apaga todo el bloque de logo/zona/mockup: el producto
+  // se cotiza tal como viene de fábrica, sin cobrar fee de aplicación.
+  const isNoPersonalization =
+    activeTechnique?.id === NO_PERSONALIZATION_TECHNIQUE_ID;
 
   const pricing = useMemo(() => {
     if (!activeTechnique) return null;
@@ -123,15 +129,19 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
           productImage={previewImage}
           allImages={product.images.length > 0 ? product.images : [product.featuredImage]}
           area={selectedArea}
-          logoUrl={logo?.previewUrl ?? null}
+          logoUrl={isNoPersonalization ? null : logo?.previewUrl ?? null}
+          hideLogoPrompt={isNoPersonalization}
         />
       </div>
 
       {/* Columna derecha: logo + selectores + pricing + stock */}
       <div className="space-y-10">
         {/* Paso 1: sube tu logo. Lo ponemos primero porque el preview live se
-            activa apenas subes el archivo y motiva al cliente a explorar. */}
-        <LogoUploader logo={logo} onChange={setLogo} />
+            activa apenas subes el archivo y motiva al cliente a explorar.
+            Escondido cuando la técnica es "Sin personalización". */}
+        {!isNoPersonalization && (
+          <LogoUploader logo={logo} onChange={setLogo} />
+        )}
 
         {product.variants.length > 0 && (
           <VariantSelector
@@ -141,7 +151,8 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
           />
         )}
 
-        {product.printAreas.length > 0 && (
+        {/* La zona de impresión no aplica cuando no hay personalización. */}
+        {!isNoPersonalization && product.printAreas.length > 0 && (
           <PrintAreaSelector
             areas={product.printAreas}
             selectedId={areaId}
@@ -202,8 +213,12 @@ export function ProductConfigurator({ product, inventoryByVariantId }: Props) {
           requiredDate={requiredDate}
           occasion={occasion}
           pricing={pricing}
-          logo={logo}
-          captureMockup={() => previewRef.current?.captureMockup() ?? null}
+          logo={isNoPersonalization ? null : logo}
+          captureMockup={() =>
+            isNoPersonalization
+              ? null
+              : previewRef.current?.captureMockup() ?? null
+          }
         />
       </div>
     </div>

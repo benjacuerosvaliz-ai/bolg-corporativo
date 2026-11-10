@@ -6,9 +6,9 @@
 export const CONTACT = {
   email: "benjamin@bolg.cl",
   /** WhatsApp en formato E.164 (sin "+" porque wa.me lo necesita así). */
-  whatsappE164: "56966466977",
+  whatsappE164: "56982392152",
   /** Display amigable para mostrar al usuario. */
-  whatsappDisplay: "+56 9 6646 6977",
+  whatsappDisplay: "+56 9 8239 2152",
 } as const;
 
 export const CONTACT_LINKS = {
